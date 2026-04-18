@@ -1,6 +1,10 @@
 # Papra Companion
 
-A self-hosted Blazor Server companion application for [Papra](https://github.com/papra-hq/papra), the open-source document management system. Papra Companion listens for document upload webhooks and automatically enriches documents with AI-generated titles and tags. It also includes an optional IMAP-based email attachment downloader that feeds files directly into Papra.
+[![CI](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/remotesojourner/papra-companion?sort=semver&style=flat&logo=github&label=release)](https://github.com/remotesojourner/papra-companion/releases/latest)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--v3-blue?style=flat&logo=gnu)](LICENSE.txt)
+
+A self-hosted Blazor Server companion application for [Papra](https://github.com/papra-hq/papra), the open-source document management system.
 
 ---
 
