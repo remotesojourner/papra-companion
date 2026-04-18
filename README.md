@@ -3,6 +3,7 @@
 [![CI](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/remotesojourner/papra-companion?sort=semver&style=flat&logo=github&label=release)](https://github.com/remotesojourner/papra-companion/releases/latest)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--v3-blue?style=flat&logo=gnu)](LICENSE.txt)
+[![AI-DECLARATION: copilot](https://img.shields.io/badge/䷼%20AI--DECLARATION-copilot-fee2e2?labelColor=fee2e2)](AI-DECLARATION.md)
 
 A self-hosted Blazor Server companion application for [Papra](https://github.com/papra-hq/papra), the open-source document management system.
 
