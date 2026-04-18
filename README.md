@@ -1,6 +1,6 @@
 # Papra Companion
 
-[![CI](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml)
+[![CI](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/remotesojourner/papra-companion?sort=semver&style=flat&logo=github&label=release)](https://github.com/remotesojourner/papra-companion/releases/latest)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--v3-blue?style=flat&logo=gnu)](LICENSE.txt)
 

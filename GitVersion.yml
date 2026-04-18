@@ -15,6 +15,7 @@ branches:
     regex: "^main$"
     label: ""
     increment: Patch
+    mode: ContinuousDeployment
     prevent-increment:
       of-merged-branch: true
     is-main-branch: true
