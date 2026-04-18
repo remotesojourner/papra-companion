@@ -1,9 +1,14 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
+# APP_UID=1654 is the non-root user pre-created in the Microsoft .NET base image.
+# Declaring it here makes the value explicit and keeps the Dockerfile self-contained.
+ARG APP_UID=1654
+# Create directories as root and transfer ownership before dropping privileges.
+# The chown ensures the app user can write into bind-mounted volumes at runtime.
+RUN mkdir -p /app/data /app/data/keys /app/attachments \
+    && chown -R ${APP_UID}:${APP_UID} /app
+USER ${APP_UID}
 WORKDIR /app
 EXPOSE 1003
-# Pre-create persistent directories so volume mounts are owned by the app user
-RUN mkdir -p /app/data /app/data/keys /app/attachments
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
