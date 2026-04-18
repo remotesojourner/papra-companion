@@ -39,14 +39,51 @@ public class OpenAiService(ISettingsService settingsService) : IOpenAiService
 
     public async Task<string> ExtractTextAsync(string dataUrl, string mimeType, string prompt, CancellationToken ct)
     {
+        if (mimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            return await ExtractTextFromImageAsync(dataUrl, prompt, ct);
+
+        return await ExtractTextFromDocumentAsync(dataUrl, mimeType, prompt, ct);
+    }
+
+    private async Task<string> ExtractTextFromImageAsync(string dataUrl, string prompt, CancellationToken ct)
+    {
+        using var client = CreateClient(longRunning: true);
+
+        var request = new ChatCompletionRequest(
+            Model: settingsService.Current.OpenAiModel,
+            Messages:
+            [
+                new ChatRequestMessage(
+                    Role: "user",
+                    Content: (object[])
+                    [
+                        TextContentPart.From(prompt),
+                        ImageContentPart.From(dataUrl)
+                    ])
+            ]);
+
+        var response = await client.PostAsJsonAsync(OpenAiConstants.ChatCompletionsEndpoint, request, ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException(
+                $"OpenAI image OCR request failed with {(int)response.StatusCode}: {errorBody}",
+                null, response.StatusCode);
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<ChatCompletionResponse>(ct);
+        return result!.Choices[0].Message.Content.Trim();
+    }
+
+    private async Task<string> ExtractTextFromDocumentAsync(string dataUrl, string mimeType, string prompt, CancellationToken ct)
+    {
         var extension = mimeType switch
         {
-            "application/pdf" => "pdf",
-            "image/jpeg" => "jpg",
-            "image/png" => "png",
-            "image/gif" => "gif",
-            "image/webp" => "webp",
-            _ => "bin"
+            "application/pdf"                                                          => "pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => "docx",
+            "application/msword"                                                       => "doc",
+            "text/plain"                                                               => "txt",
+            _                                                                          => "bin"
         };
 
         using var client = CreateClient(longRunning: true);

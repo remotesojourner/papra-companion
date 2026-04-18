@@ -10,7 +10,25 @@ internal sealed record ChatCompletionRequest(
 
 internal sealed record ChatRequestMessage(
     [property: JsonPropertyName("role")]    string Role,
-    [property: JsonPropertyName("content")] object Content); // string | ContentPart[]
+    [property: JsonPropertyName("content")] object Content); // string | object[]
+
+// Vision content parts (used when sending images via Chat Completions)
+internal sealed record TextContentPart(
+    [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("text")] string Text)
+{
+    internal static TextContentPart From(string text) => new("text", text);
+}
+
+internal sealed record ImageContentPart(
+    [property: JsonPropertyName("type")]      string Type,
+    [property: JsonPropertyName("image_url")] ImageUrlValue ImageUrl)
+{
+    internal static ImageContentPart From(string dataUrl) => new("image_url", new ImageUrlValue(dataUrl));
+}
+
+internal sealed record ImageUrlValue(
+    [property: JsonPropertyName("url")] string Url);
 
 // ── Responses API (file-based OCR) ───────────────────────────────────────────
 
