@@ -204,12 +204,6 @@ Two reasons:
 
 ---
 
-### Do you plan to add new features?
-
-If I come across a new idea or receive a suggestion that fits into a document-processing workflow, I will consider adding it. No roadmap or guarantees — this project exists to solve my own needs first.
-
----
-
 ### But these features are already planned in Papra…
 
 I do not see this as a long-term project. Ideally Papra will support all of this natively and I can happily retire this companion. The only reason I didn't contribute upstream is that I am very comfortable with C# — spinning this up with AI assistance while making sure it met my needs was far easier than learning a new language and codebase from scratch.
@@ -219,3 +213,11 @@ I do not see this as a long-term project. Ideally Papra will support all of this
 ### Is this yet another vibe-coded, low-quality project?
 
 Quality is subjective. I have been working with C# for over two decades. All the code here was done as pair programming with AI rather than blindly accepting AI output. I have also added an [AI Declaration](AI-DECLARATION.md) to be fully transparent about how AI was used. At the end of the day, this is solving a real need I have.
+
+---
+
+### Do you plan to add new features?
+
+If I come across a new idea or receive a suggestion that fits into a document-processing workflow, I will consider adding it. No roadmap or guarantees — this project exists to solve my own needs first.
+
+One area I do intend to expand is **AI service support**. Currently only OpenAI and Mistral are supported, but I plan to add support for more providers and models over time — including self-hosted LLM servers. For now, what is implemented covers my needs. If this is something you need sooner, I am happy to review and merge a well-structured PR for it.
