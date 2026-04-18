@@ -34,13 +34,27 @@
   <PropertyGroup>
     <TailwindVersion>v4.2.2</TailwindVersion>
     <TailwindToolsDir>$(MSBuildThisFileDirectory)tools</TailwindToolsDir>
+    <!-- Windows -->
     <TailwindExe Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TailwindToolsDir)\tailwindcss-windows-x64.exe</TailwindExe>
-    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(TailwindToolsDir)/tailwindcss-linux-x64</TailwindExe>
-    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TailwindToolsDir)/tailwindcss-macos-arm64</TailwindExe>
+    <!-- Linux x64 -->
+    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">$(TailwindToolsDir)/tailwindcss-linux-x64</TailwindExe>
+    <!-- Linux arm64 -->
+    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">$(TailwindToolsDir)/tailwindcss-linux-arm64</TailwindExe>
+    <!-- macOS x64 -->
+    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">$(TailwindToolsDir)/tailwindcss-macos-x64</TailwindExe>
+    <!-- macOS arm64 (Apple Silicon) -->
+    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">$(TailwindToolsDir)/tailwindcss-macos-arm64</TailwindExe>
     <TailwindDownloadUrl>https://github.com/tailwindlabs/tailwindcss/releases/download/$(TailwindVersion)/</TailwindDownloadUrl>
+    <!-- Windows -->
     <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TailwindDownloadUrl)tailwindcss-windows-x64.exe</TailwindDownloadUrl>
-    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(TailwindDownloadUrl)tailwindcss-linux-x64</TailwindDownloadUrl>
-    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TailwindDownloadUrl)tailwindcss-macos-arm64</TailwindDownloadUrl>
+    <!-- Linux x64 -->
+    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">$(TailwindDownloadUrl)tailwindcss-linux-x64</TailwindDownloadUrl>
+    <!-- Linux arm64 -->
+    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('Linux')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">$(TailwindDownloadUrl)tailwindcss-linux-arm64</TailwindDownloadUrl>
+    <!-- macOS x64 -->
+    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">$(TailwindDownloadUrl)tailwindcss-macos-x64</TailwindDownloadUrl>
+    <!-- macOS arm64 -->
+    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">$(TailwindDownloadUrl)tailwindcss-macos-arm64</TailwindDownloadUrl>
   </PropertyGroup>
 
   <Target Name="DownloadTailwind" BeforeTargets="Tailwind" Condition="!Exists('$(TailwindExe)')">
