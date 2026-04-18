@@ -1,0 +1,170 @@
+@page "/"
+@page "/pipeline"
+@inject IPipelineStatusService StatusService
+@inject ISettingsService SettingsService
+@implements IDisposable
+
+<PageTitle>Pipeline History – Papra Companion</PageTitle>
+
+<div class="p-6 space-y-6">
+
+    <div>
+        <Heading Tag="HeadingTag.H1" CustomClasses="text-2xl font-bold text-slate-900 dark:text-white">
+            Pipeline History
+        </Heading>
+        <Paragraph CustomClasses="mt-1 text-slate-500 dark:text-slate-400">
+            A log of every document processed by the pipeline.
+        </Paragraph>
+    </div>
+
+    @if (!SettingsService.Current.IsConfigured)
+    {
+        <Alert Color="AlertColor.Warning" TextEmphasis="Not configured">
+            Configure your Papra connection and AI credentials on the <a href="/settings" class="font-medium underline hover:no-underline">Settings &rarr; Papra</a> tab to enable the pipeline.
+        </Alert>
+    }
+
+    <!-- Status bar -->
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <!-- Current job -->
+        <Card>
+            <div class="p-4 flex items-center gap-3">
+                @if (_currentJob is not null)
+                {
+                    <Spinner Size="SpinnerSize.Sm" Color="SpinnerColor.Info" />
+                    <div class="min-w-0">
+                        <div class="text-xs font-medium text-blue-700 dark:text-blue-300">Processing</div>
+                        <code class="text-xs font-mono text-slate-500 dark:text-slate-400 truncate block">@Truncate(_currentJob.DocumentId, 14)</code>
+                    </div>
+                }
+                else
+                {
+                    <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                    </svg>
+                    <span class="text-sm text-slate-500 dark:text-slate-400">Idle</span>
+                }
+            </div>
+        </Card>
+
+        <!-- Stats -->
+        @foreach (var (label, value, color) in new[] {
+            ("Total",   _totalProcessed.ToString(), "text-slate-900 dark:text-white"),
+            ("Success", _totalSucceeded.ToString(), "text-green-600 dark:text-green-400"),
+            ("Failed",  _totalFailed.ToString(),    "text-red-600 dark:text-red-400")
+        })
+        {
+            <Card>
+                <div class="p-4 text-center">
+                    <div class="text-2xl font-bold @color">@value</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">@label</div>
+                </div>
+            </Card>
+        }
+    </div>
+
+    <!-- Job history table -->
+    @if (_recentJobs.Count > 0)
+    {
+        <Card>
+            <div class="p-5 space-y-3">
+                <Heading Tag="HeadingTag.H2" CustomClasses="text-base font-semibold text-slate-900 dark:text-white">
+                    Recent Activity
+                </Heading>
+                <Table Hoverable="true">
+                    <TableHead>
+                        <TableHeadCell>Document ID</TableHeadCell>
+                        <TableHeadCell>Extracted Title</TableHeadCell>
+                        <TableHeadCell>Status</TableHeadCell>
+                        <TableHeadCell>Duration</TableHeadCell>
+                        <TableHeadCell>Time</TableHeadCell>
+                    </TableHead>
+                    <TableBody>
+                        @foreach (var job in _recentJobs)
+                        {
+                            <TableRow>
+                                <TableCell>
+                                    <code class="text-xs font-mono text-slate-600 dark:text-slate-400">@Truncate(job.DocumentId, 16)</code>
+                                </TableCell>
+                                <TableCell>
+                                    <span class="text-sm text-slate-900 dark:text-white">
+                                        @(job.ExtractedTitle is not null ? Truncate(job.ExtractedTitle, 36) : "—")
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    @if (job.Status == JobStatus.Succeeded)
+                                    {
+                                        <Badge Color="BadgeColor.Success">Succeeded</Badge>
+                                    }
+                                    else if (job.Status == JobStatus.Failed)
+                                    {
+                                        <Badge Color="BadgeColor.Pink" title="@job.ErrorMessage">Failed</Badge>
+                                    }
+                                    else
+                                    {
+                                        <Badge Color="BadgeColor.Info">@job.Status</Badge>
+                                    }
+                                </TableCell>
+                                <TableCell>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400">
+                                        @(job.Duration.HasValue ? $"{job.Duration.Value.TotalSeconds:F1}s" : "—")
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400">
+                                        @job.StartedAt.ToLocalTime().ToString("HH:mm:ss")
+                                    </span>
+                                </TableCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
+            </div>
+        </Card>
+    }
+    else
+    {
+        <Card>
+            <div class="p-10 flex flex-col items-center justify-center text-center gap-3">
+                <svg class="w-10 h-10 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <Paragraph CustomClasses="text-sm text-slate-500 dark:text-slate-400">No documents processed yet. Upload a document in Papra to get started.</Paragraph>
+            </div>
+        </Card>
+    }
+
+</div>
+
+@code {
+    private PipelineJobResult? _currentJob;
+    private IReadOnlyList<PipelineJobResult> _recentJobs = [];
+    private int _totalProcessed;
+    private int _totalSucceeded;
+    private int _totalFailed;
+
+    protected override void OnInitialized()
+    {
+        StatusService.OnChanged += HandleStatusChanged;
+        RefreshStatus();
+    }
+
+    private void HandleStatusChanged()
+        => InvokeAsync(() => { RefreshStatus(); StateHasChanged(); });
+
+    private void RefreshStatus()
+    {
+        _currentJob = StatusService.CurrentJob;
+        _recentJobs = StatusService.RecentJobs;
+        _totalProcessed = _recentJobs.Count;
+        _totalSucceeded = _recentJobs.Count(j => j.Status == JobStatus.Succeeded);
+        _totalFailed = _recentJobs.Count(j => j.Status == JobStatus.Failed);
+    }
+
+    private static string Truncate(string value, int maxLength)
+        => value.Length <= maxLength ? value : value[..maxLength] + "…";
+
+    public void Dispose()
+        => StatusService.OnChanged -= HandleStatusChanged;
+}
+

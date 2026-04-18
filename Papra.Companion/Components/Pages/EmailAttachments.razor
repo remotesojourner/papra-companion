@@ -1,0 +1,161 @@
+@page "/email-attachments"
+@inject IEmailAttachmentSettingsService EmailSettingsService
+@inject IEmailAttachmentLogRepository LogRepository
+
+<PageTitle>Email Attachments – Papra Companion</PageTitle>
+
+<div class="p-6 space-y-6">
+
+    <div>
+        <Heading Tag="HeadingTag.H1" CustomClasses="text-2xl font-bold text-slate-900 dark:text-white">
+            Email Attachment Downloader
+        </Heading>
+        <Paragraph CustomClasses="mt-1 text-slate-500 dark:text-slate-400">
+            History of attachments downloaded from your IMAP mailbox.
+        </Paragraph>
+    </div>
+
+    @if (!EmailSettingsService.Current.IsConfigured)
+    {
+        <Alert Color="AlertColor.Warning" TextEmphasis="Not configured">
+            Configure your IMAP credentials on the <a href="/settings" class="font-medium underline hover:no-underline">Settings &rarr; Email</a> tab to enable the email attachment downloader.
+        </Alert>
+    }
+    else if (!EmailSettingsService.Current.Enabled)
+    {
+        <Alert Color="AlertColor.Info" TextEmphasis="Disabled">
+            The email attachment downloader is configured but currently disabled. Enable it on the <a href="/settings" class="font-medium underline hover:no-underline">Settings &rarr; Email</a> tab.
+        </Alert>
+    }
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+            <div class="p-5 flex items-center gap-4">
+                <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-700">
+                    <svg class="w-6 h-6 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-slate-900 dark:text-white">@_totalDownloaded</div>
+                    <div class="text-sm text-slate-500 dark:text-slate-400">Total Downloaded</div>
+                </div>
+            </div>
+        </Card>
+
+        <Card>
+            <div class="p-5 flex items-center gap-4">
+                <div class="p-3 rounded-xl bg-green-50 dark:bg-green-900/30">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">@_totalSucceeded</div>
+                    <div class="text-sm text-slate-500 dark:text-slate-400">Succeeded</div>
+                </div>
+            </div>
+        </Card>
+
+        <Card>
+            <div class="p-5 flex items-center gap-4">
+                <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/30">
+                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-red-500 dark:text-red-400">@_totalFailed</div>
+                    <div class="text-sm text-slate-500 dark:text-slate-400">Failed</div>
+                </div>
+            </div>
+        </Card>
+    </div>
+
+    <!-- History table -->
+    @if (_logs.Count > 0)
+    {
+        <Card>
+            <div class="p-5 space-y-3">
+                <Heading Tag="HeadingTag.H2" CustomClasses="text-base font-semibold text-slate-900 dark:text-white">
+                    Recent Downloads
+                </Heading>
+                <Table Hoverable="true">
+                    <TableHead>
+                        <TableHeadCell>Filename</TableHeadCell>
+                        <TableHeadCell>Subject</TableHeadCell>
+                        <TableHeadCell>From</TableHeadCell>
+                        <TableHeadCell>Status</TableHeadCell>
+                        <TableHeadCell>Downloaded</TableHeadCell>
+                    </TableHead>
+                    <TableBody>
+                        @foreach (var log in _logs)
+                        {
+                            <TableRow>
+                                <TableCell>
+                                    <span class="text-sm font-medium text-slate-900 dark:text-white" title="@log.SavedPath">
+                                        @log.AttachmentName
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <span class="text-sm text-slate-600 dark:text-slate-400">@Truncate(log.Subject, 40)</span>
+                                </TableCell>
+                                <TableCell>
+                                    <span class="text-sm text-slate-600 dark:text-slate-400">@log.FromEmail</span>
+                                </TableCell>
+                                <TableCell>
+                                    @if (log.Succeeded)
+                                    {
+                                        <Badge Color="BadgeColor.Success">Downloaded</Badge>
+                                    }
+                                    else
+                                    {
+                                        <Badge Color="BadgeColor.Pink" title="@log.ErrorMessage">Failed</Badge>
+                                    }
+                                </TableCell>
+                                <TableCell>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400">
+                                        @log.DownloadedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+                                    </span>
+                                </TableCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
+            </div>
+        </Card>
+    }
+    else
+    {
+        <Card>
+            <div class="p-10 flex flex-col items-center justify-center text-center gap-3">
+                <svg class="w-10 h-10 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <Paragraph CustomClasses="text-sm text-slate-500 dark:text-slate-400">No attachments downloaded yet.</Paragraph>
+            </div>
+        </Card>
+    }
+
+</div>
+
+@code {
+    [Inject] private IEmailAttachmentLogRepository LogRepo { get; set; } = default!;
+
+    private IReadOnlyList<Papra.Companion.Data.Entities.EmailAttachmentLogEntity> _logs = [];
+    private int _totalDownloaded;
+    private int _totalSucceeded;
+    private int _totalFailed;
+
+    protected override void OnInitialized()
+    {
+        _logs = LogRepository.GetRecent(100);
+        _totalDownloaded = _logs.Count;
+        _totalSucceeded = _logs.Count(l => l.Succeeded);
+        _totalFailed = _logs.Count(l => !l.Succeeded);
+    }
+
+    private static string Truncate(string value, int max)
+        => value.Length <= max ? value : value[..max] + "…";
+}

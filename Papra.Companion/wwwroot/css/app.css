@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@source "../../**/*.razor";
+@source "../../**/*.html";
+@source "../../**/*.cshtml";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    outline: none;
+}

@@ -1,0 +1,734 @@
+@page "/settings"
+@inject ISettingsService SettingsService
+@inject IEmailAttachmentSettingsService EmailSettingsService
+@inject IPapraService PapraService
+@inject IOpenAiService OpenAiService
+@inject IMistralService MistralService
+@inject IEmailAttachmentService EmailAttachmentService
+@inject NavigationManager NavManager
+@implements IDisposable
+@using Papra.Companion.Services.Interfaces
+
+<PageTitle>Settings – Papra Companion</PageTitle>
+
+<div class="p-6 space-y-6">
+
+    <div>
+        <Heading Tag="HeadingTag.H1" CustomClasses="text-2xl font-bold text-slate-900 dark:text-white">
+            Settings
+        </Heading>
+        <Paragraph CustomClasses="mt-1 text-slate-500 dark:text-slate-400">
+            Configure your Papra connection, AI services, and the prompts used during document processing.
+        </Paragraph>
+    </div>
+
+    <!-- Pipeline status overview -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        @if (SettingsService.Current.IsConfigured)
+        {
+            <Alert Color="AlertColor.Success" TextEmphasis="Document Pipeline:" Text="Active — Papra credentials configured" />
+        }
+        else
+        {
+            <Alert Color="AlertColor.Warning" TextEmphasis="Document Pipeline:" Text="Not configured — enter your Papra URL and API token below" />
+        }
+
+        @if (!EmailSettingsService.Current.IsConfigured)
+        {
+            <Alert Color="AlertColor.Warning" TextEmphasis="Email Attachments:" Text="Not configured — enter your IMAP credentials on the Email tab" />
+        }
+        else if (EmailSettingsService.Current.Enabled)
+        {
+            <Alert Color="AlertColor.Success" TextEmphasis="Email Attachments:" Text="Active — polling inbox for new attachments" />
+        }
+        else
+        {
+            <Alert Color="AlertColor.Info" TextEmphasis="Email Attachments:" Text="Configured but disabled — enable it on the Email tab" />
+        }
+    </div>
+
+    <!-- Tab bar -->
+    <div class="border-b border-slate-200 dark:border-slate-700">
+        <ul class="flex flex-wrap -mb-px text-sm font-medium">
+            @foreach (var tab in Tabs)
+            {
+                <li class="mr-1">
+                    <button @onclick="() => _activeTab = tab"
+                            class="@TabClass(tab)">
+                        @tab
+                    </button>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Form content — capped width so inputs don't span the full ultrawide canvas -->
+    <div class="max-w-3xl space-y-6">
+
+    <!-- ── Tab: Papra ─────────────────────────────────────────────────────── -->
+    @if (_activeTab == "Papra")
+    {
+        <Card>
+            <div class="p-5 space-y-4">
+                <SectionHeader Icon="link" Title="Papra Connection" />
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Base URL <span class="text-red-500">*</span></label>
+                    <TextInput @bind-Value="_settings.PapraBaseUrl"
+                               Placeholder="https://documents.example.com"
+                               InputType="text" />
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">The root URL of your Papra instance (no trailing slash).</Paragraph>
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">API Token <span class="text-red-500">*</span></label>
+                    <TextInput @bind-Value="_settings.PapraApiToken"
+                               Placeholder="@(_savedPapraToken ? "Already saved — enter a new token to replace" : "Bearer token from Papra settings")"
+                               InputType="password" />
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <Button Color="ButtonColor.Default" @onclick="TestPapraAsync" Disabled="_papraTestRunning">
+                        @if (_papraTestRunning) { <Spinner Size="SpinnerSize.Sm" Class="mr-2" /> }
+                        Test Connection
+                    </Button>
+                    @if (_papraTestResult is not null)
+                    {
+                        <Badge Color="@(_papraTestOk ? BadgeColor.Success : BadgeColor.Pink)">@_papraTestResult</Badge>
+                    }
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Webhook URL</label>
+                    <Paragraph CustomClasses="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                        Configure this URL in Papra under <strong>Settings &rarr; Webhooks</strong>. Papra will POST to it on every document upload.
+                    </Paragraph>
+                    <div class="flex items-center gap-2">
+                        <code class="flex-1 px-3 py-2 text-xs bg-slate-100 dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded-lg break-all font-mono">
+                            @_webhookUrl
+                        </code>
+                        <button @onclick="CopyWebhookUrl"
+                                class="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
+                                title="Copy to clipboard">
+                            @if (_copied)
+                            {
+                                <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            }
+                            else
+                            {
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Card>
+    }
+
+    <!-- ── Tab: AI Services ───────────────────────────────────────────────── -->
+    @if (_activeTab == "AI Services")
+    {
+        <Card>
+            <div class="p-5 space-y-4">
+                <SectionHeader Icon="brain" Title="OpenAI" />
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">API Key <span class="text-red-500">*</span></label>
+                    <TextInput @bind-Value="_settings.OpenAiApiKey"
+                               Placeholder="@(_savedOpenAiKey ? "Already saved — enter a new key to replace" : "sk-...")"
+                               InputType="password" />
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">Used to generate document titles, assign tags, and optionally perform OCR.</Paragraph>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <Button Color="ButtonColor.Default" @onclick="TestOpenAiAsync" Disabled="_openAiTestRunning">
+                        @if (_openAiTestRunning) { <Spinner Size="SpinnerSize.Sm" Class="mr-2" /> }
+                        Test Connection
+                    </Button>
+                    @if (_openAiTestResult is not null)
+                    {
+                        <Badge Color="@(_openAiTestOk ? BadgeColor.Success : BadgeColor.Pink)">@_openAiTestResult</Badge>
+                    }
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Model</label>
+                    <select class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 text-slate-900
+                                   dark:border-slate-600 dark:bg-slate-700 dark:text-white
+                                   focus:ring-blue-500 focus:border-blue-500"
+                            value="@_settings.OpenAiModel"
+                            @onchange="OnModelChanged">
+                        @foreach (var m in OpenAiModels)
+                        {
+                            <option value="@m.Value">@m.Label</option>
+                        }
+                    </select>
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        Used for title extraction, tag suggestions, and OCR when no Mistral key is provided.
+                    </Paragraph>
+                </div>
+            </div>
+        </Card>
+
+        <Card>
+            <div class="p-5 space-y-4">
+                <SectionHeader Icon="ocr" Title="Mistral OCR" />
+
+                <div class="flex items-start gap-2 p-3 rounded-lg bg-slate-100 dark:bg-slate-700/60">
+                    <svg class="w-4 h-4 mt-0.5 shrink-0 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-xs text-slate-600 dark:text-slate-300">
+                        <strong>Mistral key is optional.</strong> When omitted, the selected OpenAI model handles OCR via vision.
+                        Providing a Mistral key enables <code class="inline px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 font-mono">mistral-ocr-latest</code> for higher-quality text extraction.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">API Key</label>
+                    <TextInput @bind-Value="_settings.MistralApiKey"
+                               Placeholder="@(_savedMistralKey ? "Already saved — enter a new key to replace" : "Mistral Cloud API key (optional)")"
+                               InputType="password" />
+                    <div class="flex items-center justify-between mt-1">
+                        <Paragraph CustomClasses="text-xs text-slate-500 dark:text-slate-400">Leave blank to use OpenAI vision for OCR.</Paragraph>
+                        @if (_savedMistralKey)
+                        {
+                            <button @onclick="ClearMistralKeyAsync"
+                                    class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 underline transition-colors shrink-0">
+                                Clear saved key
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_settings.MistralApiKey) || _savedMistralKey)
+                {
+                    <div class="flex items-center gap-3">
+                        <Button Color="ButtonColor.Default" @onclick="TestMistralAsync" Disabled="_mistralTestRunning">
+                            @if (_mistralTestRunning) { <Spinner Size="SpinnerSize.Sm" Class="mr-2" /> }
+                            Test Connection
+                        </Button>
+                        @if (_mistralTestResult is not null)
+                        {
+                            <Badge Color="@(_mistralTestOk ? BadgeColor.Success : BadgeColor.Pink)">@_mistralTestResult</Badge>
+                        }
+                    </div>
+                }
+
+                <div class="flex items-center gap-2 pt-1">
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Active OCR engine:</span>
+                            @if (!_savedMistralKey && string.IsNullOrWhiteSpace(_settings.MistralApiKey))
+                            {
+                        <Badge Color="BadgeColor.Info">OpenAI Vision</Badge>
+                    }
+                    else
+                    {
+                        <Badge Color="BadgeColor.Success">Mistral OCR</Badge>
+                    }
+                </div>
+            </div>
+        </Card>
+    }
+
+    <!-- ── Tab: AI Prompts ────────────────────────────────────────────────── -->
+    @if (_activeTab == "AI Prompts")
+    {
+        <!-- Title Prompt -->
+        <Card>
+            <div class="p-5 space-y-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <SectionHeader Icon="title" Title="Title Extraction Prompt" />
+                        <Paragraph CustomClasses="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Sent to OpenAI to derive a clean document title from the extracted text.
+                        </Paragraph>
+                    </div>
+                    <button @onclick="ResetTitlePrompt"
+                            class="shrink-0 text-xs text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 underline transition-colors">
+                        Reset to default
+                    </button>
+                </div>
+                <PlaceholderTable Placeholders="@TitlePlaceholders" />
+                <textarea @bind="_settings.TitlePrompt"
+                          rows="10"
+                          class="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-300 bg-slate-50 text-slate-900
+                                 dark:border-slate-600 dark:bg-slate-700 dark:text-white
+                                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y">
+                </textarea>
+            </div>
+        </Card>
+
+        <!-- Tag Prompt -->
+        <Card>
+            <div class="p-5 space-y-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <SectionHeader Icon="tag" Title="Tag Selection Prompt" />
+                        <Paragraph CustomClasses="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Sent to OpenAI to pick the most relevant tags from your Papra tag library.
+                        </Paragraph>
+                    </div>
+                    <button @onclick="ResetTagPrompt"
+                            class="shrink-0 text-xs text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 underline transition-colors">
+                        Reset to default
+                    </button>
+                </div>
+                <PlaceholderTable Placeholders="@TagPlaceholders" />
+                <textarea @bind="_settings.TagPrompt"
+                          rows="14"
+                          class="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-300 bg-slate-50 text-slate-900
+                                 dark:border-slate-600 dark:bg-slate-700 dark:text-white
+                                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y">
+                </textarea>
+            </div>
+        </Card>
+
+        <!-- OCR Prompt -->
+        <Card>
+            <div class="p-5 space-y-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <SectionHeader Icon="ocr" Title="OCR Prompt" />
+                        <Paragraph CustomClasses="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Instruction passed to OpenAI vision when Mistral is not configured. Has no effect when Mistral OCR is active.
+                        </Paragraph>
+                    </div>
+                    <button @onclick="ResetOcrPrompt"
+                            class="shrink-0 text-xs text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 underline transition-colors">
+                        Reset to default
+                    </button>
+                </div>
+                <PlaceholderTable Placeholders="@OcrPlaceholders" />
+                <textarea @bind="_settings.OcrPrompt"
+                          rows="4"
+                          class="w-full px-3 py-2 text-sm font-mono rounded-lg border border-slate-300 bg-slate-50 text-slate-900
+                                 dark:border-slate-600 dark:bg-slate-700 dark:text-white
+                                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y">
+                </textarea>
+            </div>
+        </Card>
+    }
+
+    <!-- ── Tab: Email ────────────────────────────────────────────────── -->
+    @if (_activeTab == "Email")
+    {
+        <Card>
+            <div class="p-5 space-y-4">
+                <SectionHeader Icon="link" Title="IMAP Connection" />
+
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" id="emailEnabled" @bind="_email.Enabled"
+                           class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600" />
+                    <label for="emailEnabled" class="text-sm font-medium text-slate-700 dark:text-slate-300">Enable automatic attachment downloading</label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">IMAP Host <span class="text-red-500">*</span></label>
+                        <TextInput @bind-Value="_email.Host" Placeholder="imap.example.com" InputType="text" />
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Port</label>
+                        <input type="number" @bind="_email.Port"
+                               class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 text-slate-900
+                                      dark:border-slate-600 dark:bg-slate-700 dark:text-white
+                                      focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Username <span class="text-red-500">*</span></label>
+                        <TextInput @bind-Value="_email.Username" Placeholder="user@example.com" InputType="text" />
+                    </div>
+                    <div>
+                        <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Password <span class="text-red-500">*</span></label>
+                        <TextInput @bind-Value="_email.Password"
+                                   Placeholder="@(_savedImapPassword ? "Already saved — enter a new password to replace" : "••••••••")"
+                                   InputType="password" />
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <Button Color="ButtonColor.Default" @onclick="TestImapAsync" Disabled="_imapTestRunning">
+                        @if (_imapTestRunning) { <Spinner Size="SpinnerSize.Sm" Class="mr-2" /> }
+                        Test Connection
+                    </Button>
+                    @if (_imapTestResult is not null)
+                    {
+                        <Badge Color="@(_imapTestOk ? BadgeColor.Success : BadgeColor.Pink)">@_imapTestResult</Badge>
+                    }
+                </div>
+
+                <div class="flex flex-wrap gap-6 pt-1">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="useSsl" @bind="_email.UseSsl"
+                               class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600" />
+                        <label for="useSsl" class="text-sm text-slate-700 dark:text-slate-300">SSL / TLS</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="useStartTls" @bind="_email.UseStartTls"
+                               class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600" />
+                        <label for="useStartTls" class="text-sm text-slate-700 dark:text-slate-300">STARTTLS</label>
+                    </div>
+                </div>
+            </div>
+        </Card>
+
+        <Card>
+            <div class="p-5 space-y-4">
+                <SectionHeader Icon="tag" Title="Folder &amp; Filtering" />
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">IMAP Folder</label>
+                    <TextInput @bind-Value="_email.ImapFolder" Placeholder="INBOX" InputType="text" />
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">Leave blank to search all folders.</Paragraph>
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Subject Filter (regex)</label>
+                    <TextInput @bind-Value="_email.SubjectRegex" Placeholder="e.g. Invoice|Receipt" InputType="text" />
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">Only process emails whose subject matches this pattern. Leave blank to match all.</Paragraph>
+                </div>
+
+                <div class="flex flex-wrap gap-6">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="regexIgnoreCase" @bind="_email.SubjectRegexIgnoreCase"
+                               class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600" />
+                        <label for="regexIgnoreCase" class="text-sm text-slate-700 dark:text-slate-300">Ignore case</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="regexAnywhere" @bind="_email.SubjectRegexMatchAnywhere"
+                               class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600" />
+                        <label for="regexAnywhere" class="text-sm text-slate-700 dark:text-slate-300">Match anywhere in subject (not just start)</label>
+                    </div>
+                </div>
+            </div>
+        </Card>
+
+        <Card>
+            <div class="p-5 space-y-4">
+                <SectionHeader Icon="ocr" Title="Download Schedule" />
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Poll Interval (seconds)</label>
+                    <input type="number" @bind="_email.PollIntervalSeconds" min="60"
+                           class="w-40 px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 text-slate-900
+                                  dark:border-slate-600 dark:bg-slate-700 dark:text-white
+                                  focus:ring-blue-500" />
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">How often to check for new emails. Minimum 60 seconds.</Paragraph>
+                </div>
+
+                <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Filename Template</label>
+                    <TextInput @bind-Value="_email.FilenameTemplate" Placeholder="{{ date }}/{{ subject }}/{{ attachment_name }}" InputType="text" />
+                    <div class="mt-2">
+                        <PlaceholderTable Placeholders="@FilenameTemplatePlaceholders" />
+                    </div>
+                </div>
+            </div>
+        </Card>
+
+        <Card>
+            <div class="p-5 space-y-4">
+                <SectionHeader Icon="title" Title="After Download" />
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="deleteAfter" @bind="_email.DeleteAfterDownload"
+                           class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded dark:bg-slate-700 dark:border-slate-600" />
+                    <label for="deleteAfter" class="text-sm font-medium text-slate-700 dark:text-slate-300">Delete emails from mailbox after downloading attachments</label>
+                </div>
+
+                @if (_email.DeleteAfterDownload)
+                {
+                    <div>
+                        <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Copy to folder before deleting</label>
+                        <TextInput @bind-Value="_email.DeleteCopyFolder" Placeholder="Archived (optional)" InputType="text" />
+                        <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">If set, a copy is moved to this IMAP folder before the original is deleted.</Paragraph>
+                    </div>
+                }
+            </div>
+        </Card>
+    }
+
+    <!-- Save -->
+    <div class="flex items-center gap-3 pb-6">
+        <Button Color="ButtonColor.Primary" @onclick="SaveSettings">
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Save Settings
+        </Button>
+        @if (_savedNotice)
+        {
+            <Badge Color="BadgeColor.Success">&#10003; Saved</Badge>
+        }
+    </div>
+
+    </div><!-- /max-w-3xl -->
+
+</div>
+
+@code {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private static readonly string[] Tabs = ["Papra", "AI Services", "AI Prompts", "Email"];
+
+    private record ModelOption(string Value, string Label);
+
+    private static readonly ModelOption[] OpenAiModels =
+    [
+        new("gpt-4.1",      "GPT-4.1 — flagship, best for complex tasks"),
+        new("gpt-4.1-mini", "GPT-4.1 Mini — balanced speed & capability"),
+        new("gpt-4.1-nano", "GPT-4.1 Nano — fastest & most affordable"),
+        new("gpt-4o",       "GPT-4o — multimodal, strong OCR"),
+        new("gpt-4o-mini",  "GPT-4o Mini — cost-efficient (recommended)"),
+        new("gpt-4-turbo",  "GPT-4 Turbo — high capability"),
+        new("o3",           "o3 — most powerful reasoning model"),
+        new("o3-mini",      "o3 Mini — reasoning, lower cost"),
+        new("o4-mini",      "o4 Mini — next-gen reasoning, efficient"),
+        new("gpt-5",        "GPT-5 — latest generation"),
+        new("gpt-5-mini",   "GPT-5 Mini — latest generation, lightweight"),
+    ];
+
+    private static readonly (string Token, string Description)[] TitlePlaceholders =
+    [
+        ("{{original_title}}", "The raw filename or title as stored in Papra before processing."),
+        ("{{content}}",        "The full extracted text of the document from OCR."),
+    ];
+
+    private static readonly (string Token, string Description)[] TagPlaceholders =
+    [
+        ("{{available_tags}}", "A comma-separated list of all tags defined in your Papra organisation."),
+        ("{{original_title}}", "The raw filename or title as stored in Papra before processing."),
+        ("{{content}}",        "The full extracted text of the document from OCR."),
+    ];
+
+    private static readonly (string Token, string Description)[] OcrPlaceholders =
+    [
+        ("(none)", "This prompt receives no placeholders — it is sent as a plain instruction alongside the document image."),
+    ];
+
+    private static readonly (string Token, string Description)[] FilenameTemplatePlaceholders =
+    [
+        ("{{ message_id }}",      "Unique identifier of the email message."),
+        ("{{ attachment_name }}", "Original filename of the attachment."),
+        ("{{ subject }}",         "Email subject line."),
+        ("{{ from_email }}",      "Sender's email address."),
+        ("{{ date }}",            "Date the email was sent (yyyy-MM-dd). Use {{ date }} for the full date."),
+    ];
+
+    private PipelineSettings _settings = new();
+    private EmailAttachmentSettings _email = new();
+    private bool _savedNotice;
+    private bool _copied;
+    private string _webhookUrl = string.Empty;
+    private string _activeTab = "Papra";
+
+    // Tracks whether a secret was saved (to show placeholder hint instead of real value)
+    private bool _savedPapraToken;
+    private bool _savedOpenAiKey;
+    private bool _savedMistralKey;
+    private bool _savedImapPassword;
+
+    // Test connection state
+    private bool   _papraTestRunning;   private string? _papraTestResult;   private bool _papraTestOk;
+    private bool   _openAiTestRunning;  private string? _openAiTestResult;  private bool _openAiTestOk;
+    private bool   _mistralTestRunning; private string? _mistralTestResult; private bool _mistralTestOk;
+    private bool   _imapTestRunning;    private string? _imapTestResult;    private bool _imapTestOk;
+
+    private string TabClass(string tab) => _activeTab == tab
+        ? "inline-block px-4 py-3 text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400 rounded-t-lg"
+        : "inline-block px-4 py-3 text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300 rounded-t-lg transition-colors";
+
+    protected override void OnInitialized()
+    {
+        _settings = CopySettings(SettingsService.Current);
+        _email = CopyEmail(EmailSettingsService.Current);
+        ResetEditToggles();
+        SettingsService.OnChanged += HandleSettingsChanged;
+        EmailSettingsService.OnChanged += HandleSettingsChanged;
+    }
+
+    private void ResetEditToggles()
+    {
+        _savedPapraToken   = !string.IsNullOrWhiteSpace(SettingsService.Current.PapraApiToken);
+        _savedOpenAiKey    = !string.IsNullOrWhiteSpace(SettingsService.Current.OpenAiApiKey);
+        _savedMistralKey   = !string.IsNullOrWhiteSpace(SettingsService.Current.MistralApiKey);
+        _savedImapPassword = !string.IsNullOrWhiteSpace(EmailSettingsService.Current.Password);
+        // Clear the bound fields so the inputs start empty — the saved value
+        // is held in the persisted store and only overwritten if the user types a new one.
+        _settings.PapraApiToken = string.Empty;
+        _settings.OpenAiApiKey  = string.Empty;
+        _settings.MistralApiKey = string.Empty;
+        _email.Password         = string.Empty;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _webhookUrl = NavManager.BaseUri.TrimEnd('/') + "/webhook/document";
+            StateHasChanged();
+        }
+    }
+
+    private void HandleSettingsChanged()
+        => InvokeAsync(StateHasChanged);
+
+    private void OnModelChanged(ChangeEventArgs e)
+        => _settings.OpenAiModel = e.Value?.ToString() ?? "gpt-4o-mini";
+
+    private void ResetTitlePrompt() => _settings.TitlePrompt = PipelineSettings.DefaultTitlePrompt;
+    private void ResetTagPrompt()   => _settings.TagPrompt   = PipelineSettings.DefaultTagPrompt;
+    private void ResetOcrPrompt()   => _settings.OcrPrompt   = PipelineSettings.DefaultOcrPrompt;
+
+    private async Task SaveSettings()
+    {
+        // Build snapshot copies with secrets filled in — never write real secrets back into
+        // the bound fields, which would expose them in the UI before ResetEditToggles() runs.
+        var settingsToSave = CopySettings(_settings);
+        if (string.IsNullOrWhiteSpace(settingsToSave.PapraApiToken)) settingsToSave.PapraApiToken = SettingsService.Current.PapraApiToken;
+        if (string.IsNullOrWhiteSpace(settingsToSave.OpenAiApiKey))  settingsToSave.OpenAiApiKey  = SettingsService.Current.OpenAiApiKey;
+        if (string.IsNullOrWhiteSpace(settingsToSave.MistralApiKey)) settingsToSave.MistralApiKey = SettingsService.Current.MistralApiKey;
+
+        var emailToSave = CopyEmail(_email);
+        if (string.IsNullOrWhiteSpace(emailToSave.Password)) emailToSave.Password = EmailSettingsService.Current.Password;
+
+        ResetEditToggles();
+        SettingsService.Save(settingsToSave);
+        EmailSettingsService.Save(emailToSave);
+        ResetEditToggles();
+        if (_email.DeleteAfterDownload && !string.IsNullOrWhiteSpace(_email.DeleteCopyFolder))
+        {
+            try { await EmailAttachmentService.EnsureCopyFolderExistsAsync(default); }
+            catch { /* best-effort — connection may not be available yet */ }
+        }
+        _savedNotice = true;
+        StateHasChanged();
+        await Task.Delay(2500);
+        _savedNotice = false;
+        StateHasChanged();
+    }
+
+    private async Task ClearMistralKeyAsync()
+    {
+        var settingsToSave = CopySettings(_settings);
+        settingsToSave.MistralApiKey = string.Empty;
+        // Retain other unsaved secrets so they aren't lost.
+        if (string.IsNullOrWhiteSpace(settingsToSave.PapraApiToken)) settingsToSave.PapraApiToken = SettingsService.Current.PapraApiToken;
+        if (string.IsNullOrWhiteSpace(settingsToSave.OpenAiApiKey))  settingsToSave.OpenAiApiKey  = SettingsService.Current.OpenAiApiKey;
+        _settings.MistralApiKey = string.Empty;
+        SettingsService.Save(settingsToSave);
+        ResetEditToggles();
+        _mistralTestResult = null;
+        _savedNotice = true;
+        StateHasChanged();
+        await Task.Delay(2500);
+        _savedNotice = false;
+        StateHasChanged();
+    }
+
+    private async Task TestPapraAsync()
+    {
+        _papraTestRunning = true; _papraTestResult = null; StateHasChanged();
+        var token = string.IsNullOrWhiteSpace(_settings.PapraApiToken) ? SettingsService.Current.PapraApiToken : _settings.PapraApiToken;
+        try
+        {
+            _papraTestResult = await PapraService.TestConnectionAsync(_settings.PapraBaseUrl, token, default);
+            _papraTestOk = true;
+        }
+        catch (Exception) { _papraTestResult = "Failed"; _papraTestOk = false; }
+        finally { _papraTestRunning = false; StateHasChanged(); }
+    }
+
+    private async Task TestOpenAiAsync()
+    {
+        _openAiTestRunning = true; _openAiTestResult = null; StateHasChanged();
+        var key = string.IsNullOrWhiteSpace(_settings.OpenAiApiKey) ? SettingsService.Current.OpenAiApiKey : _settings.OpenAiApiKey;
+        try
+        {
+            _openAiTestResult = await OpenAiService.TestConnectionAsync(key, _settings.OpenAiModel, default);
+            _openAiTestOk = true;
+        }
+        catch (Exception) { _openAiTestResult = "Failed"; _openAiTestOk = false; }
+        finally { _openAiTestRunning = false; StateHasChanged(); }
+    }
+
+    private async Task TestMistralAsync()
+    {
+        _mistralTestRunning = true; _mistralTestResult = null; StateHasChanged();
+        var key = string.IsNullOrWhiteSpace(_settings.MistralApiKey) ? SettingsService.Current.MistralApiKey : _settings.MistralApiKey;
+        try
+        {
+            _mistralTestResult = await MistralService.TestConnectionAsync(key, default);
+            _mistralTestOk = true;
+        }
+        catch (Exception) { _mistralTestResult = "Failed"; _mistralTestOk = false; }
+        finally { _mistralTestRunning = false; StateHasChanged(); }
+    }
+
+    private async Task TestImapAsync()
+    {
+        _imapTestRunning = true; _imapTestResult = null; StateHasChanged();
+        try
+        {
+            var password = string.IsNullOrWhiteSpace(_email.Password) ? EmailSettingsService.Current.Password : _email.Password;
+                _imapTestResult = await EmailAttachmentService.TestConnectionAsync(password, default);
+            _imapTestOk = true;
+        }
+        catch (Exception) { _imapTestResult = "Failed"; _imapTestOk = false; }
+        finally { _imapTestRunning = false; StateHasChanged(); }
+    }
+
+    private async Task CopyWebhookUrl()
+    {
+        await JS.InvokeVoidAsync("clipboardCopy", _webhookUrl);
+        _copied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        _copied = false;
+        StateHasChanged();
+    }
+
+    private static PipelineSettings CopySettings(PipelineSettings src) => new()
+    {
+        PapraBaseUrl  = src.PapraBaseUrl,
+        PapraApiToken = src.PapraApiToken,
+        MistralApiKey = src.MistralApiKey,
+        OpenAiApiKey  = src.OpenAiApiKey,
+        OpenAiModel   = src.OpenAiModel,
+        TitlePrompt   = src.TitlePrompt,
+        TagPrompt     = src.TagPrompt,
+        OcrPrompt     = src.OcrPrompt,
+    };
+
+    private static EmailAttachmentSettings CopyEmail(EmailAttachmentSettings src) => new()
+    {
+        Enabled                   = src.Enabled,
+        Host                      = src.Host,
+        Port                      = src.Port,
+        Username                  = src.Username,
+        Password                  = src.Password,
+        ImapFolder                = src.ImapFolder,
+        SubjectRegex              = src.SubjectRegex,
+        SubjectRegexIgnoreCase    = src.SubjectRegexIgnoreCase,
+        SubjectRegexMatchAnywhere = src.SubjectRegexMatchAnywhere,
+        FilenameTemplate          = src.FilenameTemplate,
+        UseSsl                    = src.UseSsl,
+        UseStartTls               = src.UseStartTls,
+        DeleteAfterDownload       = src.DeleteAfterDownload,
+        DeleteCopyFolder          = src.DeleteCopyFolder,
+        PollIntervalSeconds       = src.PollIntervalSeconds,
+    };
+
+    public void Dispose()
+    {
+        SettingsService.OnChanged -= HandleSettingsChanged;
+        EmailSettingsService.OnChanged -= HandleSettingsChanged;
+    }
+}

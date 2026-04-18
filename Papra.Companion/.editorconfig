@@ -1,0 +1,17 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.cs]
+indent_size = 4
+
+[wwwroot/css/app.css]
+# Mark as generated so Visual Studio skips CSS language-service validation.
+# This suppresses false-positive warnings for Tailwind v4 directives
+# (@source, @custom-variant) that VS's built-in CSS linter does not recognise.
+generated_code = true

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+  <Project Path="Papra.Companion.Data/Papra.Companion.Data.csproj" />
+  <Project Path="Papra.Companion/Papra.Companion.csproj" />
+</Solution>

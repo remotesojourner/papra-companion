@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>cda988f7-284e-4b13-8c24-81a47e1431e8</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Flowbite" Version="0.2.6-beta" />
+    <PackageReference Include="MailKit" Version="4.16.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Papra.Companion.Data\Papra.Companion.Data.csproj" />
+  </ItemGroup>
+
+  <!-- Tailwind CSS v4 Build Target -->
+  <!--
+    The Tailwind standalone CLI is downloaded automatically on first build and is
+    git-ignored.  Set TailwindVersion to pin a specific release.
+  -->
+  <PropertyGroup>
+    <TailwindVersion>v4.2.2</TailwindVersion>
+    <TailwindToolsDir>$(MSBuildThisFileDirectory)tools</TailwindToolsDir>
+    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TailwindToolsDir)\tailwindcss-windows-x64.exe</TailwindExe>
+    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(TailwindToolsDir)/tailwindcss-linux-x64</TailwindExe>
+    <TailwindExe Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TailwindToolsDir)/tailwindcss-macos-arm64</TailwindExe>
+    <TailwindDownloadUrl>https://github.com/tailwindlabs/tailwindcss/releases/download/$(TailwindVersion)/</TailwindDownloadUrl>
+    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TailwindDownloadUrl)tailwindcss-windows-x64.exe</TailwindDownloadUrl>
+    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(TailwindDownloadUrl)tailwindcss-linux-x64</TailwindDownloadUrl>
+    <TailwindDownloadUrl Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TailwindDownloadUrl)tailwindcss-macos-arm64</TailwindDownloadUrl>
+  </PropertyGroup>
+
+  <Target Name="DownloadTailwind" BeforeTargets="Tailwind" Condition="!Exists('$(TailwindExe)')">
+    <MakeDir Directories="$(TailwindToolsDir)" />
+    <Message Text="Downloading Tailwind CSS CLI $(TailwindVersion)..." Importance="high" />
+    <Exec Command="curl -fsSL &quot;$(TailwindDownloadUrl)&quot; -o &quot;$(TailwindExe)&quot;" />
+    <Exec Command="chmod +x &quot;$(TailwindExe)&quot;" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+  </Target>
+
+  <Target Name="Tailwind" BeforeTargets="Build" Condition="Exists('$(TailwindExe)')">
+    <Exec Command="&quot;$(TailwindExe)&quot; -i ./wwwroot/css/app.css -o ./wwwroot/css/app.min.css --minify" />
+  </Target>
+
+  <ItemGroup>
+    <UpToDateCheckBuilt Include="wwwroot/css/app.css" Set="Css" />
+    <UpToDateCheckBuilt Include="wwwroot/css/app.min.css" Set="Css" />
+    <UpToDateCheckBuilt Include="tailwind.config.js" Set="Css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="wwwroot\css\app.min.css" />
+    <None Remove="tools\tailwindcss*" />
+    <!-- app.css is a Tailwind source file — only app.min.css is served -->
+    <Content Remove="wwwroot\css\app.css" />
+  </ItemGroup>
+
+</Project>

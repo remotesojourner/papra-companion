@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="css/app.min.css" />
+    <link rel="stylesheet" href="_content/Flowbite/flowbite.min.css" />
+    <link rel="stylesheet" href="@Assets["Papra.Companion.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="InteractiveServer" />
+    <!-- Dark mode: run before render to prevent flash -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('color-theme');
+            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 antialiased">
+    <Routes @rendermode="InteractiveServer" />
+    <ReconnectModal />
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <!-- Floating UI (required for Flowbite Dropdown, Tooltip) -->
+    <script src="https://cdn.jsdelivr.net/npm/@@floating-ui/core@@1.6.9"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@floating-ui/dom@@1.6.13"></script>
+    <!-- Flowbite JS -->
+    <script src="_content/Flowbite/flowbite.js"></script>
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+</body>
+
+</html>

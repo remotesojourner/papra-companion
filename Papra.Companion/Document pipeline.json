@@ -1,0 +1,450 @@
+{
+  "name": "Document pipeline",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        128,
+        -16
+      ],
+      "id": "2c4833c3-99c4-4270-a460-e34972e953ec",
+      "name": "Wait",
+      "webhookId": "4081a80a-40e2-4129-aff9-c950fc552798"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2040a440-c807-497a-a76e-a42ce0118457",
+        "options": {
+          "responseCode": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "041843c6-5bd6-4789-8ca7-11bcdebc20d1",
+      "name": "Papra webhook",
+      "webhookId": "2040a440-c807-497a-a76e-a42ce0118457"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://documents.novacasa.uk/api/organizations/{{ $('Papra webhook').item.json.body.data.organizationId }}/documents/{{ $('Papra webhook').item.json.body.data.documentId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $('Extract document title').last().json.output.last().content.last().text}}"
+            },
+            {
+              "name": "content",
+              "value": "={{ $('Extract document content').last().json.extractedText }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -16,
+        224
+      ],
+      "id": "d91a8e32-9a26-4b76-92cc-94335e95406f",
+      "name": "Update document content",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "cGdkry5pMscH4Yzp",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=I will provide you with the content of a document that has been partially read by OCR (so it may contain errors).\nYour task is to find a suitable document title that I can use as the title in my document management system.\nIf the original title is already adding value and not just a technical filename you can use it as extra information to enhance your suggestion.\nRespond only with the title, without any additional information. \n\nThe data will be provided using an XML-like format for clarity:\n\n<original_title>{{$('Get document info').last().json.document.name}}</original_title>\n<content>\n{{ $('Extract document content').last().json.extractedText }}\n</content>\n\n"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        944,
+        -16
+      ],
+      "id": "b4664297-ae8e-470a-a396-18be827a073e",
+      "name": "Extract document title",
+      "credentials": {
+        "openAiApi": {
+          "id": "23zbRbE4yS7GUoBF",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputType": "url",
+        "url": "=data:{{$('Get document info').last().json.document.mimeType}};base64,{{$('Convert file to base64 string').last().json.data}}",
+        "options": {
+          "batch": false
+        }
+      },
+      "type": "n8n-nodes-base.mistralAi",
+      "typeVersion": 1,
+      "position": [
+        784,
+        -16
+      ],
+      "id": "516985d2-909f-4eb2-8fae-cf5ae25e0a62",
+      "name": "Extract document content",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "R9jIIKWNjyMLopS1",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        -16
+      ],
+      "id": "9d2da0a1-8b9d-49c3-b86e-4827cb5dd993",
+      "name": "Convert file to base64 string"
+    },
+    {
+      "parameters": {
+        "url": "=https://documents.novacasa.uk/api/organizations/{{ $json.body.data.organizationId }}/documents/{{ $('Papra webhook').item.json.body.data.documentId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "3ca18bac-f4a0-4cb8-9830-7141fde045c6",
+      "name": "Get document info",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "cGdkry5pMscH4Yzp",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://documents.novacasa.uk/api/organizations/{{ $('Papra webhook').item.json.body.data.organizationId }}/documents/{{ $('Papra webhook').item.json.body.data.documentId }}/file",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "169a745d-cecc-425d-b638-5070e6988f49",
+      "name": "Get document file",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "cGdkry5pMscH4Yzp",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=I will provide you with the content and the title of a document.\nYour task is to select appropriate tags for the document from the list of available tags I will provide. Only select tags from the provided list. Respond only with the selected tags as a comma-separated list, without any additional information.\n\nThe data will be provided using an XML-like format for clarity:\n\n<available_tags>\n{{ $('Join tags').last().json.tagList}}\n</available_tags>\n<original_title>{{$('Get document info').last().json.document.name}}</original_title>\n<content>\n{{ $('Extract document content').last().json.extractedText }}\n</content>\n\nPlease concisely select the tags from the list above that best describe the document.\nBe very selective and only choose the most relevant tags since too many tags will make the document less discoverable.\n\n"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        224
+      ],
+      "id": "e11f48cf-42d5-4808-8929-fdcd3d2e3b57",
+      "name": "Extract tags",
+      "credentials": {
+        "openAiApi": {
+          "id": "23zbRbE4yS7GUoBF",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://documents.novacasa.uk/api/organizations/{{ $('Papra webhook').item.json.body.data.organizationId }}/tags",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        224
+      ],
+      "id": "7dda68c7-1a0e-4153-adfb-c01410d2a5ea",
+      "name": "Get available tags",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "cGdkry5pMscH4Yzp",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  tagList: $(\"Get available tags\").last().json.tags.map(e => e.name).join(', ')\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        224
+      ],
+      "id": "e06884f6-3b1f-4416-b1c7-bc03a3abf0df",
+      "name": "Join tags"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://documents.novacasa.uk/api/organizations/{{ $('Papra webhook').item.json.body.data.organizationId }}/documents/{{ $('Papra webhook').item.json.body.data.documentId }}/tags",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "tagId",
+              "value": "={{$('Convert tags to ids').item.json.result}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        224
+      ],
+      "id": "fe5b4ccd-7288-4259-a844-c32e0a1d3918",
+      "name": "Update tags",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "cGdkry5pMscH4Yzp",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const suggestedTags = $('Extract tags').last().json.output[0].content[0].text.split(',').map(s => s.trim());\n\nconst foundTags = $('Get available tags').last().json.tags\n  .filter(tag => suggestedTags.includes(tag.name))\n  .map(tag => tag.id);\n\nreturn foundTags.map(item => {\n  return {\n    json: {\n      result: item\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        224
+      ],
+      "id": "c210bf62-ff42-40b5-b2b1-ce091fa3016a",
+      "name": "Convert tags to ids"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get document info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Papra webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract document title": {
+      "main": [
+        [
+          {
+            "node": "Update document content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract document content": {
+      "main": [
+        [
+          {
+            "node": "Extract document title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert file to base64 string": {
+      "main": [
+        [
+          {
+            "node": "Extract document content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get document info": {
+      "main": [
+        [
+          {
+            "node": "Get document file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get document file": {
+      "main": [
+        [
+          {
+            "node": "Convert file to base64 string",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update document content": {
+      "main": [
+        [
+          {
+            "node": "Get available tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get available tags": {
+      "main": [
+        [
+          {
+            "node": "Join tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join tags": {
+      "main": [
+        [
+          {
+            "node": "Extract tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract tags": {
+      "main": [
+        [
+          {
+            "node": "Convert tags to ids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert tags to ids": {
+      "main": [
+        [
+          {
+            "node": "Update tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "41350c5b-ce48-4179-9595-fb0752afb34f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fb7c2d798c65a45110e4ad80569703b306df2d7c9bdc272321fb487b359b2e92"
+  },
+  "id": "09rGakdOgG1wqM5z",
+  "tags": []
+}
