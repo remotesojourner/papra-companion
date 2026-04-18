@@ -473,7 +473,7 @@
 </div>
 
 @code {
-    [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private IJSRuntime Js { get; set; } = default!;
 
     private static readonly string[] Tabs = ["Papra", "AI Services", "AI Prompts", "Email"];
 
@@ -676,8 +676,7 @@
         _imapTestRunning = true; _imapTestResult = null; StateHasChanged();
         try
         {
-            var password = string.IsNullOrWhiteSpace(_email.Password) ? EmailSettingsService.Current.Password : _email.Password;
-                _imapTestResult = await EmailAttachmentService.TestConnectionAsync(password, default);
+            _imapTestResult = await EmailAttachmentService.TestConnectionAsync(_email, default);
             _imapTestOk = true;
         }
         catch (Exception) { _imapTestResult = "Failed"; _imapTestOk = false; }
@@ -686,7 +685,7 @@
 
     private async Task CopyWebhookUrl()
     {
-        await JS.InvokeVoidAsync("clipboardCopy", _webhookUrl);
+        await Js.InvokeVoidAsync("clipboardCopy", _webhookUrl);
         _copied = true;
         StateHasChanged();
         await Task.Delay(2000);

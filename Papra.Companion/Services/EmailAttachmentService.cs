@@ -216,37 +216,20 @@ public partial class EmailAttachmentService(
         return Path.Combine(contentRootPath, AppPaths.AttachmentsFolder, filename);
     }
 
-    private static readonly char[] _invalidFileNameChars =
+    private static readonly char[] InvalidFileNameChars =
         [.. Path.GetInvalidFileNameChars().Union([':', '*', '?', '"', '<', '>', '|', '\\', '/'])];
 
     internal static string SanitizePath(string value)
     {
-        foreach (var c in _invalidFileNameChars)
+        foreach (var c in InvalidFileNameChars)
             value = value.Replace(c, '_');
         return value;
     }
 
-    public async Task<string> TestConnectionAsync(string? passwordOverride, CancellationToken ct)
+    public async Task<string> TestConnectionAsync(EmailAttachmentSettings settings, CancellationToken ct)
     {
-        var stored = settingsService.Current;
-        var settings = new EmailAttachmentSettings
-        {
-            Enabled                   = stored.Enabled,
-            Host                      = stored.Host,
-            Port                      = stored.Port,
-            Username                  = stored.Username,
-            Password                  = string.IsNullOrWhiteSpace(passwordOverride) ? stored.Password : passwordOverride,
-            ImapFolder                = stored.ImapFolder,
-            SubjectRegex              = stored.SubjectRegex,
-            SubjectRegexIgnoreCase    = stored.SubjectRegexIgnoreCase,
-            SubjectRegexMatchAnywhere = stored.SubjectRegexMatchAnywhere,
-            FilenameTemplate          = stored.FilenameTemplate,
-            UseSsl                    = stored.UseSsl,
-            UseStartTls               = stored.UseStartTls,
-            DeleteAfterDownload       = stored.DeleteAfterDownload,
-            DeleteCopyFolder          = stored.DeleteCopyFolder,
-            PollIntervalSeconds       = stored.PollIntervalSeconds,
-        };
+        if (string.IsNullOrWhiteSpace(settings.Password))
+            settings.Password = settingsService.Current.Password;
         using var client = new ImapClient();
         await ConnectAsync(client, settings, ct);
         try

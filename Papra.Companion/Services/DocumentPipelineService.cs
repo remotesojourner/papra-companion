@@ -38,7 +38,7 @@ public partial class DocumentPipelineService(
             var dataUrl = $"data:{docMimeType};base64,{base64}";
 
             var extractedText = settings.UseOpenAiForOcr
-                ? await openAiService.ExtractTextFromImageAsync(dataUrl, settings.OcrPrompt, ct)
+                ? await openAiService.ExtractTextAsync(dataUrl, docMimeType, settings.OcrPrompt, ct)
                 : await mistralService.ExtractTextAsync(dataUrl, ct);
             LogExtractedText(logger, extractedText.Length);
 

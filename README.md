@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Papra.Companion/wwwroot/logo.svg" alt="Papra Companion Logo" width="160" />
+</p>
+
 # Papra Companion
 
 [![CI](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/remotesojourner/papra-companion/actions/workflows/ci.yml)

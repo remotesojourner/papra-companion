@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Papra.Companion.Http;
 
-// ── Requests ────────────────────────────────────────────────────────────────
+// ── Chat Completions request ─────────────────────────────────────────────────
 
 internal sealed record ChatCompletionRequest(
     [property: JsonPropertyName("model")]    string Model,
@@ -12,21 +12,41 @@ internal sealed record ChatRequestMessage(
     [property: JsonPropertyName("role")]    string Role,
     [property: JsonPropertyName("content")] object Content); // string | ContentPart[]
 
-internal abstract record ContentPart(
+// ── Responses API (file-based OCR) ───────────────────────────────────────────
+
+internal sealed record ResponsesRequest(
+    [property: JsonPropertyName("model")]  string Model,
+    [property: JsonPropertyName("input")] ResponsesInputItem[] Input);
+
+internal sealed record ResponsesInputItem(
+    [property: JsonPropertyName("role")]    string Role,
+    [property: JsonPropertyName("content")] object[] Content); // ResponsesContentPart[]
+
+internal abstract record ResponsesContentPart(
     [property: JsonPropertyName("type")] string Type);
 
-internal sealed record TextContentPart(
+internal sealed record ResponsesTextPart(
     [property: JsonPropertyName("text")] string Text)
-    : ContentPart("text");
+    : ResponsesContentPart("input_text");
 
-internal sealed record ImageContentPart(
-    [property: JsonPropertyName("image_url")] ImageUrlValue ImageUrl)
-    : ContentPart("image_url");
+// Inline file — filename and file_data sit directly on the content part (no wrapper object)
+internal sealed record ResponsesFilePart(
+    [property: JsonPropertyName("filename")]  string Filename,
+    [property: JsonPropertyName("file_data")] string FileData)
+    : ResponsesContentPart("input_file");
 
-internal sealed record ImageUrlValue(
-    [property: JsonPropertyName("url")] string Url);
+internal sealed record ResponsesResponse(
+    [property: JsonPropertyName("output")] ResponsesOutputItem[] Output);
 
-// ── Responses ───────────────────────────────────────────────────────────────
+internal sealed record ResponsesOutputItem(
+    [property: JsonPropertyName("type")]    string Type,
+    [property: JsonPropertyName("content")] ResponsesOutputContent[]? Content);
+
+internal sealed record ResponsesOutputContent(
+    [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("text")] string? Text);
+
+// ── Chat Completions response ────────────────────────────────────────────────
 
 internal sealed record ChatCompletionResponse(
     [property: JsonPropertyName("choices")] ChatChoice[] Choices);

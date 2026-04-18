@@ -50,8 +50,8 @@ public class DocumentPipelineServiceTests
         papra.GetDocumentInfoAsync("org1", "doc1", Arg.Any<CancellationToken>())
             .Returns(("invoice.pdf", "image/jpeg"));
         papra.GetDocumentFileAsync("org1", "doc1", Arg.Any<CancellationToken>())
-            .Returns(new byte[] { 1, 2, 3 });
-        openAi.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns((byte[])[1, 2, 3]);
+        openAi.ExtractTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("extracted text");
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Generated Title");
@@ -75,7 +75,7 @@ public class DocumentPipelineServiceTests
         papra.GetDocumentInfoAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(("doc.pdf", "application/pdf"));
         papra.GetDocumentFileAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new byte[] { 0xFF });
+            .Returns((byte[])[0xFF]);
         mistral.ExtractTextAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("mistral text");
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -86,20 +86,20 @@ public class DocumentPipelineServiceTests
         await svc.ProcessAsync(job, CancellationToken.None);
 
         await mistral.Received(1).ExtractTextAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await openAi.DidNotReceive().ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await openAi.DidNotReceive().ExtractTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ProcessAsync_WithMatchingTags_AppliesTagsToDocument()
     {
-        var (_, status, papra, openAi, _, svc) = Build();
+        var (_, _, papra, openAi, _, svc) = Build();
         var job = new ProcessingJob { DocumentId = "doc3", OrganizationId = "org1" };
 
         papra.GetDocumentInfoAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(("receipt.pdf", "image/png"));
         papra.GetDocumentFileAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns([1]);
-        openAi.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        openAi.ExtractTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("content");
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Title", "Finance, Invoice");
@@ -123,7 +123,7 @@ public class DocumentPipelineServiceTests
             .Returns(("file.pdf", "image/png"));
         papra.GetDocumentFileAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns([1]);
-        openAi.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        openAi.ExtractTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("text");
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Title");
@@ -196,7 +196,7 @@ public class DocumentPipelineServiceTests
             .Returns(("file.png", "image/png"));
         papra.GetDocumentFileAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(fileBytes);
-        openAi.ExtractTextFromImageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+        openAi.ExtractTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("text");
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns("Title");
@@ -205,6 +205,6 @@ public class DocumentPipelineServiceTests
 
         await svc.ProcessAsync(job, CancellationToken.None);
 
-        await openAi.Received(1).ExtractTextFromImageAsync(expectedDataUrl, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await openAi.Received(1).ExtractTextAsync(expectedDataUrl, "image/png", Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 }
