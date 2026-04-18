@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Papra.Companion.Constants;
 using Papra.Companion.Http;
 using Papra.Companion.Services.Interfaces;

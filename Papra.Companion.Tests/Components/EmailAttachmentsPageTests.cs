@@ -1,4 +1,3 @@
-using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Papra.Companion.Components.Pages;
@@ -11,8 +10,8 @@ namespace Papra.Companion.Tests.Components;
 
 public class EmailAttachmentsPageTests : ComponentTestBase
 {
-    private IEmailAttachmentSettingsService _settingsSvc = default!;
-    private IEmailAttachmentLogRepository _logRepo = default!;
+    private readonly IEmailAttachmentSettingsService _settingsSvc = default!;
+    private readonly IEmailAttachmentLogRepository _logRepo = default!;
 
     public EmailAttachmentsPageTests()
     {

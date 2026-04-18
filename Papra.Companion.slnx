@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="docker-compose.dcproj">
+  <Project Path="docker-compose/docker-compose.dcproj">
     <Build />
   </Project>
   <Project Path="Papra.Companion.Data/Papra.Companion.Data.csproj" />

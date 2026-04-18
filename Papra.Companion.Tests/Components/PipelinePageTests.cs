@@ -1,9 +1,6 @@
-using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Papra.Companion.Components.Pages;
-using Papra.Companion.Data.Entities;
-using Papra.Companion.Data.Repositories.Interfaces;
 using Papra.Companion.Models;
 using Papra.Companion.Services.Interfaces;
 
@@ -11,8 +8,8 @@ namespace Papra.Companion.Tests.Components;
 
 public class PipelinePageTests : ComponentTestBase
 {
-    private IPipelineStatusService _statusSvc = default!;
-    private ISettingsService _settingsSvc = default!;
+    private readonly IPipelineStatusService _statusSvc;
+    private readonly ISettingsService _settingsSvc;
 
     public PipelinePageTests()
     {

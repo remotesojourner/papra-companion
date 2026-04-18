@@ -11,12 +11,12 @@ namespace Papra.Companion.Tests.Components;
 
 public class SettingsPageTests : ComponentTestBase
 {
-    private ISettingsService _settingsSvc = default!;
-    private IEmailAttachmentSettingsService _emailSettingsSvc = default!;
-    private IPapraService _papraSvc = default!;
-    private IOpenAiService _openAiSvc = default!;
-    private IMistralService _mistralSvc = default!;
-    private IEmailAttachmentService _emailAttachmentSvc = default!;
+    private readonly ISettingsService _settingsSvc = default!;
+    private readonly IEmailAttachmentSettingsService _emailSettingsSvc = default!;
+    private readonly IPapraService _papraSvc = default!;
+    private readonly IOpenAiService _openAiSvc = default!;
+    private readonly IMistralService _mistralSvc = default!;
+    private readonly IEmailAttachmentService _emailAttachmentSvc = default!;
 
     public SettingsPageTests()
     {

@@ -1,5 +1,4 @@
 using Papra.Companion.Data.Entities;
-using Papra.Companion.Data.Repositories;
 using Papra.Companion.Data.Repositories.Interfaces;
 using Papra.Companion.Models;
 using Papra.Companion.Services.Interfaces;

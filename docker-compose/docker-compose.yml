@@ -2,7 +2,7 @@ services:
   papra.companion:
     image: ${DOCKER_REGISTRY-}papracompanion
     build:
-      context: .
+      context: ..
       dockerfile: Papra.Companion/Dockerfile
     volumes:
       - papra-data:/app/data

@@ -7,13 +7,15 @@
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>papra.companion</DockerServiceName>
+    <DockerComposeBaseFilePath>docker-compose</DockerComposeBaseFilePath>
   </PropertyGroup>
   <ItemGroup>
-    <None Include=".github\workflows\ci.yml" />
+    <None Include="..\..\.github\workflows\ci.yml" />
     <None Include="docker-compose.override.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />
-    <None Include=".dockerignore" />
+    <None Include="..\..\.dockerignore" />
+    <None Include="Properties\launchSettings.json" />
   </ItemGroup>
 </Project>

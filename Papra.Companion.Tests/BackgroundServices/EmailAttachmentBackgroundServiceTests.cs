@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using Papra.Companion.BackgroundServices;
 using Papra.Companion.Models;
 using Papra.Companion.Services.Interfaces;
 

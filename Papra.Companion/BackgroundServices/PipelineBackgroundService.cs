@@ -1,4 +1,3 @@
-using Papra.Companion.Services;
 using Papra.Companion.Services.Interfaces;
 
 namespace Papra.Companion.BackgroundServices;
