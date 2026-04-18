@@ -10,13 +10,13 @@ public class EmailAttachmentSettingsRepository(IDbContextFactory<AppDbContext> d
     public EmailAttachmentSettingsEntity? Get()
     {
         using var db = dbFactory.CreateDbContext();
-        return db.EmailAttachmentSettings.AsNoTracking().FirstOrDefault();
+        return db.EmailAttachmentSettings.Find(1);
     }
 
     public async Task UpsertAsync(EmailAttachmentSettingsEntity entity)
     {
         await using var db = await dbFactory.CreateDbContextAsync();
-        var existing = await db.EmailAttachmentSettings.FirstOrDefaultAsync(e => e.Id == 1);
+        var existing = await db.EmailAttachmentSettings.FindAsync(1);
         if (existing is null)
         {
             entity.Id = 1;
