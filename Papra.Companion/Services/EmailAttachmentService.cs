@@ -169,7 +169,7 @@ public partial class EmailAttachmentService(
         return folder;
     }
 
-    private static Regex? BuildSubjectRegex(EmailAttachmentSettings settings)
+    internal static Regex? BuildSubjectRegex(EmailAttachmentSettings settings)
     {
         if (string.IsNullOrWhiteSpace(settings.SubjectRegex))
             return null;
@@ -182,7 +182,7 @@ public partial class EmailAttachmentService(
         return new Regex(pattern, options);
     }
 
-    private static string BuildSavePath(
+    internal static string BuildSavePath(
         EmailAttachmentSettings settings,
         string contentRootPath,
         string messageId, string attachmentName, string subject, string fromEmail, DateTimeOffset date)
@@ -216,7 +216,7 @@ public partial class EmailAttachmentService(
         return Path.Combine(contentRootPath, AppPaths.AttachmentsFolder, filename);
     }
 
-    private static string SanitizePath(string value)
+    internal static string SanitizePath(string value)
     {
         foreach (var c in Path.GetInvalidFileNameChars())
             value = value.Replace(c, '_');
