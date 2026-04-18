@@ -47,6 +47,8 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
    ```yaml
    services:
      papra-companion:
+       container_name: papra-companion
+       restart: unless-stopped
        image: ghcr.io/remotesojourner/papra-companion:latest
        ports:
          - "1003:1003"
@@ -57,7 +59,7 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 
    **Volume notes:**
    - `./data` — stores the SQLite database and Data Protection keys on the host next to your compose file. Created automatically on first run.
-   - `/path/to/papra/ingestion` — replace this with the path to the folder that Papra watches for new documents. Please not that it needs to have the organisation id at the end. e.g. /papra/consume/org_bwnnm9xppyw81ru5r3wvvr5d. Any attachment downloaded from email will be dropped here and picked up by Papra automatically.
+   - `/path/to/papra/ingestion` — replace this with the path to the folder that Papra watches for new documents. Please note that it needs to have the organisation id at the end. e.g. /papra/consume/org_bwnnm9xppyw81ru5r3wvvr5d. Any attachment downloaded from email will be dropped here and picked up by Papra automatically.
 
 2. **Start the stack**
 
@@ -65,7 +67,7 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
    docker compose up -d
    ```
 
-   The app will be available at **http://localhost:1003**.
+   The app will be available on port `1003` of the host you deployed it on (e.g. `http://192.168.1.100:1003`).
 
 3. **Configure via the Settings page**
 
@@ -73,13 +75,7 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 
 4. **Register the webhook in Papra**
 
-   In Papra, go to **Settings → Webhooks** and add the webhook URL shown on the Papra settings tab:
-
-   ```
-   http://<companion-host>:1003/webhook/document
-   ```
-
-   From this point on, every document uploaded to Papra will automatically be processed by the pipeline.
+   In Papra, go to **Settings → Webhooks** and add the webhook URL displayed on the Papra settings tab in the Companion. The exact URL is shown there ready to copy. When configuring the webhook, make sure to select only the **Document created** event — that is the only event Papra Companion handles. From this point on, every document uploaded to Papra will automatically be processed by the pipeline.
 
 ---
 
@@ -193,3 +189,33 @@ dotnet ef migrations add <MigrationName> --project Papra.Companion.Data --startu
 ## License
 
 This project is provided as-is. See [LICENSE](LICENSE.txt) for details.
+
+---
+
+## FAQ
+
+### Why was this created?
+
+Two reasons:
+
+**Email injection** — Papra supports email-based document injection, but that requires either [OWLRelay](https://owlrelay.email/) or your own Cloudflare Worker. I wanted a much simpler self-hosted approach: a dedicated IMAP inbox I can forward emails to. Papra Companion polls that inbox on a schedule, downloads any matching attachments straight into Papra's watched folder, and optionally deletes or moves the email afterwards. No third-party relay service, no Cloudflare account, no extra infrastructure.
+
+**OCR, automated titles, and tags** — Papra already does OCR when you upload a document, but the extracted text is only used for search — titles and tags still need to be set manually. I didn't want to do that for every document. Papra Companion intercepts the webhook fired on each upload, runs the document through OCR (Mistral OCR when configured, OpenAI vision as a fallback), then uses an LLM to generate a descriptive title and select the most relevant tags from your Papra library automatically. Mistral OCR in particular produces noticeably better results than general-purpose OCR for dense or complex documents, and at a very low cost per page.
+
+---
+
+### Do you plan to add new features?
+
+If I come across a new idea or receive a suggestion that fits into a document-processing workflow, I will consider adding it. No roadmap or guarantees — this project exists to solve my own needs first.
+
+---
+
+### But these features are already planned in Papra…
+
+I do not see this as a long-term project. Ideally Papra will support all of this natively and I can happily retire this companion. The only reason I didn't contribute upstream is that I am very comfortable with C# — spinning this up with AI assistance while making sure it met my needs was far easier than learning a new language and codebase from scratch.
+
+---
+
+### Is this yet another vibe-coded, low-quality project?
+
+Quality is subjective. I have been working with C# for over two decades. All the code here was done as pair programming with AI rather than blindly accepting AI output. I have also added an [AI Declaration](AI-DECLARATION.md) to be fully transparent about how AI was used. At the end of the day, this is solving a real need I have.
