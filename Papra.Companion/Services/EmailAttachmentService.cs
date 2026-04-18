@@ -216,9 +216,16 @@ public partial class EmailAttachmentService(
         return Path.Combine(contentRootPath, AppPaths.AttachmentsFolder, filename);
     }
 
+    // Fixed cross-platform set: union of Windows + Linux invalid filename chars.
+    // Path.GetInvalidFileNameChars() is OS-dependent — on Linux ':' is valid, but
+    // filenames that arrive from email clients are typically Windows-formatted and
+    // the resulting files must be portable, so we always strip this full set.
+    private static readonly char[] _invalidFileNameChars =
+        [.. Path.GetInvalidFileNameChars().Union([':', '*', '?', '"', '<', '>', '|', '\\', '/'])];
+
     internal static string SanitizePath(string value)
     {
-        foreach (var c in Path.GetInvalidFileNameChars())
+        foreach (var c in _invalidFileNameChars)
             value = value.Replace(c, '_');
         return value;
     }
