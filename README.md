@@ -183,4 +183,4 @@ dotnet ef migrations add <MigrationName> --project Papra.Companion.Data --startu
 
 ## License
 
-This project is provided as-is. See [LICENSE](LICENSE) for details.
+This project is provided as-is. See [LICENSE](LICENSE.txt) for details.
