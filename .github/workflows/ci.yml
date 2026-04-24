@@ -6,7 +6,8 @@ on:
     paths-ignore:
       - "*.md"
       - "docs/**"
-      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yml"      
+      - ".github/*.yml"
       - "AI-DECLARATION.md"
       - "LICENSE.txt"
   pull_request:
@@ -14,7 +15,8 @@ on:
     paths-ignore:
       - "*.md"
       - "docs/**"
-      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yml"      
+      - ".github/*.yml"
       - "AI-DECLARATION.md"
       - "LICENSE.txt"
 
