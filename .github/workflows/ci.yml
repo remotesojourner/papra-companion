@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - "*.md"
       - "docs/**"
-      - ".github/workflows/*.yml"
+      - ".github/**"      
       - "AI-DECLARATION.md"
       - "LICENSE.txt"
   pull_request:
@@ -14,7 +14,7 @@ on:
     paths-ignore:
       - "*.md"
       - "docs/**"
-      - ".github/workflows/*.yml"
+      - ".github/**"      
       - "AI-DECLARATION.md"
       - "LICENSE.txt"
 
@@ -28,6 +28,8 @@ jobs:
   version:
     name: Calculate Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       semver: ${{ steps.gitversion.outputs.semVer }}
       major: ${{ steps.gitversion.outputs.major }}
@@ -37,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout (full history required by GitVersion)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -67,7 +69,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
@@ -116,7 +118,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -127,7 +129,7 @@ jobs:
 
       - name: Extract Docker metadata (labels only)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
@@ -136,7 +138,7 @@ jobs:
 
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Papra.Companion/Dockerfile
@@ -159,7 +161,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # Sanitise "linux/amd64" → "linux-amd64" for a valid artifact name
           name: digest-${{ matrix.platform == 'linux/amd64' && 'linux-amd64' || 'linux-arm64' }}
@@ -200,7 +202,7 @@ jobs:
 
       - name: Extract Docker metadata (tags & labels)
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -231,7 +233,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -271,7 +273,7 @@ jobs:
           EOF
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.version.outputs.semver }}
           name: v${{ needs.version.outputs.semver }}

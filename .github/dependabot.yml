@@ -1,0 +1,37 @@
+version: 2
+updates:
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Docker Compose
+  - package-ecosystem: "docker-compose"
+    directory: "/docker-compose"
+    schedule:
+      interval: "weekly"
+
+  # Docker (Dockerfile for the Blazor App)
+  - package-ecosystem: "docker"
+    directory: "/Papra.Companion"
+    schedule:
+      interval: "weekly"
+
+  # NuGet (Main App)
+  - package-ecosystem: "nuget"
+    directory: "/Papra.Companion"
+    schedule:
+      interval: "weekly"
+
+  # NuGet (Data Library)
+  - package-ecosystem: "nuget"
+    directory: "/Papra.Companion.Data"
+    schedule:
+      interval: "weekly"
+
+  # NuGet (Tests)
+  - package-ecosystem: "nuget"
+    directory: "/Papra.Companion.Tests"
+    schedule:
+      interval: "weekly"
