@@ -42,6 +42,7 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 
 ## Quick Start (Docker Compose)
 
+
 1. **Create a `docker-compose.yml`** with the following content:
 
    ```yaml
@@ -61,7 +62,18 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
    - `./data` — stores the SQLite database and Data Protection keys on the host next to your compose file. Created automatically on first run.
    - `/path/to/papra/ingestion` — replace this with the path to the folder that Papra watches for new documents. Please note that it needs to have the organisation id at the end. e.g. /papra/consume/org_bwnnm9xppyw81ru5r3wvvr5d. Any attachment downloaded from email will be dropped here and picked up by Papra automatically.
 
-2. **Start the stack**
+2. **Set the environment variable to disable Papra's built-in content extraction**
+
+   In your Papra container configuration (not the Companion), add the following environment variable:
+
+   ```yaml
+   environment:
+     - DOCUMENTS_CONTENT_EXTRACTION_ENABLED=false
+   ```
+
+   This ensures that Papra Companion handles all content extraction and prevents duplicate processing by Papra itself.
+
+3. **Start the stack**
 
    ```bash
    docker compose up -d
@@ -69,11 +81,11 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 
    The app will be available on port `1003` of the host you deployed it on (e.g. `http://192.168.1.100:1003`).
 
-3. **Configure via the Settings page**
+4. **Configure via the Settings page**
 
    Open the browser, navigate to **Settings**, and complete the four configuration tabs (see [Configuration](#configuration) below).
 
-4. **Register the webhook in Papra**
+5. **Register the webhook in Papra**
 
    In Papra, go to **Settings → Webhooks** and add the webhook URL displayed on the Papra settings tab in the Companion. The exact URL is shown there ready to copy. When configuring the webhook, make sure to select only the **Document created** event — that is the only event Papra Companion handles. From this point on, every document uploaded to Papra will automatically be processed by the pipeline.
 
@@ -142,7 +154,6 @@ Configures the IMAP attachment downloader background service.
 ### Requirements
 
 - .NET 10 SDK
-- No Node.js needed — Tailwind CSS is downloaded automatically
 
 ### Run locally
 
@@ -150,8 +161,6 @@ Configures the IMAP attachment downloader background service.
 cd Papra.Companion
 dotnet run
 ```
-
-The first build will download the Tailwind CSS standalone CLI (`tailwindcss.exe` / `tailwindcss` on Linux/macOS) to the project directory and generate `wwwroot/css/app.min.css`. The binary is git-ignored.
 
 ### Tailwind CSS
 
