@@ -7,7 +7,7 @@ namespace Papra.Companion.Services;
 
 public class PipelineStatusService : IPipelineStatusService
 {
-    private const int MaxJobs = 20;
+    private const int MaxJobs = 100;
 
     private readonly IJobResultRepository _repository;
     private readonly List<PipelineJobResult> _recentJobs;

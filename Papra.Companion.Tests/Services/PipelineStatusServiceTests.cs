@@ -92,14 +92,14 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void JobCompleted_CappsAtTwentyJobs()
+    public void JobCompleted_CapsAtHundredJobs()
     {
         var service = new PipelineStatusService(EmptyRepository());
 
-        for (var i = 0; i < 25; i++)
+        for (var i = 0; i < 125; i++)
             service.JobCompleted(new PipelineJobResult { DocumentId = $"doc{i}" });
 
-        Assert.Equal(20, service.RecentJobs.Count);
+        Assert.Equal(100, service.RecentJobs.Count);
     }
 
     [Fact]

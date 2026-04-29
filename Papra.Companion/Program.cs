@@ -13,6 +13,9 @@ using Papra.Companion.Models;
 using Papra.Companion.Services;
 using Papra.Companion.Services.Interfaces;
 
+
+var appStartTime = DateTimeOffset.UtcNow;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
@@ -68,6 +71,28 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseAntiforgery();
 app.MapStaticAssets();
+
+// Minimal API endpoint for application stats
+app.MapGet("/api/stats", (IPipelineStatusService pipelineStatusService, IEmailAttachmentLogRepository emailAttachmentLogRepository) =>
+{
+    var uptime = DateTimeOffset.UtcNow - appStartTime;
+    var recentEmailDownloads = emailAttachmentLogRepository.GetRecent(100);
+    var totalEmailDownloads = recentEmailDownloads.Count;
+    var mostRecentDownload = recentEmailDownloads.OrderByDescending(e => e.DownloadedAt).FirstOrDefault();
+
+    var stats = new
+    {
+        version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown",
+        uptimeSeconds = (long)uptime.TotalSeconds,
+        totalRecentDocumentsProcessed = pipelineStatusService.RecentJobs.Count,
+        totalRecentDocumentsSucceeded = pipelineStatusService.RecentJobs.Count(j => j.Status == JobStatus.Succeeded),
+        totalRecentDocumentsFailed = pipelineStatusService.RecentJobs.Count(j => j.Status == JobStatus.Failed),
+        totalRecentDownloads = totalEmailDownloads,
+        totalRecentSucceeded = recentEmailDownloads.Count(d => d.Succeeded),
+        totalRecentFailed = recentEmailDownloads.Count(d => !d.Succeeded)
+    };
+    return Results.Json(stats);
+});
 
 // Webhook endpoint - Papra calls this when a document is uploaded
 app.MapPost("/webhook/document", async (HttpContext context,
