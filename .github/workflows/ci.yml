@@ -89,7 +89,7 @@ jobs:
           --results-directory ./test-results
 
       - name: Publish test results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: xUnit Tests
