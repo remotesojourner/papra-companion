@@ -170,7 +170,7 @@ app.MapGet("/api/stats", (IPipelineStatusService pipelineStatusService, IEmailAt
         totalRecentFailed = recentEmailDownloads.Count(d => !d.Succeeded)
     };
     return Results.Json(stats);
-});
+}).AllowAnonymous();
 
 // Webhook endpoint - Papra calls this when a document is uploaded
 app.MapPost("/webhook/document", async (HttpContext context,
@@ -215,7 +215,7 @@ app.MapPost("/webhook/document", async (HttpContext context,
 
     logger.LogQueuedDocument(docId, orgId);
     return Results.Accepted();
-});
+}).AllowAnonymous();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
