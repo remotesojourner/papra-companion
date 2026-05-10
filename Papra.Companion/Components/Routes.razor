@@ -1,6 +1,23 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+@inject OidcOptions OidcOptions
+
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        @if (OidcOptions.Enabled)
+        {
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+                <Authorizing>
+                    <p>Signing in...</p>
+                </Authorizing>
+            </AuthorizeRouteView>
+        }
+        else
+        {
+            <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        }
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
+

@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/Solution items/">
+    <File Path="AI-DECLARATION.md" />
+    <File Path="GitVersion.yml" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="docker-compose/docker-compose.dcproj">
     <Build />
   </Project>

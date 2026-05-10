@@ -93,7 +93,42 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 
 ## Configuration
 
-All configuration is stored in the SQLite database and managed entirely through the browser-based Settings UI. No environment variables or config files need to be edited manually.
+Most configuration is stored in the SQLite database and managed through the browser-based Settings UI. Authentication is controlled via environment variables (see [Environment Variables](#environment-variables) below).
+
+### Environment Variables
+
+#### Authentication (OIDC)
+
+OIDC authentication is **optional**. When `OIDC_ISSUER` is not set the app runs without authentication.
+
+To enable it, add the following to your `docker-compose.yml`:
+
+```yaml
+services:
+  papra-companion:
+    environment:
+      - OIDC_ISSUER=https://your-provider.example.com
+      - OIDC_CLIENT_ID=your-client-id
+      - OIDC_CLIENT_SECRET=your-client-secret
+```
+
+| Variable | Required | Description |
+|---|---|---|
+| `OIDC_ISSUER` | No | Issuer URL of your OIDC provider (e.g. Authentik, Keycloak, Dex). When absent, authentication is disabled. |
+| `OIDC_CLIENT_ID` | When `OIDC_ISSUER` is set | Client ID registered with your OIDC provider |
+| `OIDC_CLIENT_SECRET` | When `OIDC_ISSUER` is set | Client secret for the registered application |
+
+When authentication is enabled:
+- Unauthenticated users are automatically redirected to the OIDC provider — there is no local login screen.
+- After sign-in, users are redirected back to the app.
+- The authenticated username is shown in the top navigation bar alongside a logout button.
+
+The redirect URI to register with your OIDC provider is:
+```
+http(s)://<your-companion-host>/signin-oidc
+```
+
+---
 
 ### Tab: Papra
 

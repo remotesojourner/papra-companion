@@ -1,5 +1,8 @@
 using System.Text.Json.Nodes;
 using Flowbite.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Papra.Companion;
@@ -42,6 +45,51 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
     .SetApplicationName("Papra.Companion");
 
+// OIDC Authentication (optional — only enabled when OIDC_ISSUER is set)
+var oidcIssuer = Environment.GetEnvironmentVariable("OIDC_ISSUER");
+var oidcEnabled = !string.IsNullOrWhiteSpace(oidcIssuer);
+
+builder.Services.AddSingleton(new OidcOptions(oidcEnabled));
+
+if (oidcEnabled)
+{
+    var oidcClientId = Environment.GetEnvironmentVariable("OIDC_CLIENT_ID") ?? throw new InvalidOperationException("OIDC_CLIENT_ID environment variable is required when OIDC_ISSUER is set.");
+    var oidcClientSecret = Environment.GetEnvironmentVariable("OIDC_CLIENT_SECRET") ?? throw new InvalidOperationException("OIDC_CLIENT_SECRET environment variable is required when OIDC_ISSUER is set.");
+
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+    })
+    .AddCookie(options =>
+    {
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    })
+    .AddOpenIdConnect(options =>
+    {
+        options.Authority = oidcIssuer;
+        options.ClientId = oidcClientId;
+        options.ClientSecret = oidcClientSecret;
+        options.ResponseType = "code";
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters.NameClaimType = "name";
+    });
+}
+else
+{
+    builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie();
+}
+
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
 // Pipeline services
 builder.Services.AddSingleton<IJobResultRepository, JobResultRepository>();
 builder.Services.AddSingleton<IPipelineSettingsRepository, PipelineSettingsRepository>();
@@ -69,8 +117,25 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 app.MapStaticAssets();
+
+// Auth endpoints (only wired when OIDC is enabled)
+if (oidcEnabled)
+{
+    app.MapGet("/auth/login", () => Results.Challenge(
+        new AuthenticationProperties { RedirectUri = "/" },
+        [OpenIdConnectDefaults.AuthenticationScheme]));
+
+    app.MapGet("/auth/logout", async (HttpContext context) =>
+    {
+        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
+            new AuthenticationProperties { RedirectUri = "/" });
+    });
+}
 
 // Minimal API endpoint for application stats
 app.MapGet("/api/stats", (IPipelineStatusService pipelineStatusService, IEmailAttachmentLogRepository emailAttachmentLogRepository) =>
@@ -150,3 +215,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+record OidcOptions(bool Enabled);
