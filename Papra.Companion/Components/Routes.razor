@@ -1,10 +1,11 @@
+@using Microsoft.AspNetCore.Components.Authorization
 @inject OidcOptions OidcOptions
 
 <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         @if (OidcOptions.Enabled)
         {
-            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <AuthorizeRouteView RouteData="routeData" Defau ltLayout="typeof(Layout.MainLayout)">
                 <NotAuthorized>
                     <RedirectToLogin />
                 </NotAuthorized>
@@ -20,4 +21,3 @@
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
-
