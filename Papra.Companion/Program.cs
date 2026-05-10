@@ -87,7 +87,15 @@ else
         .AddCookie();
 }
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    if (oidcEnabled)
+    {
+        options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+    }
+});
 builder.Services.AddCascadingAuthenticationState();
 
 // Pipeline services
