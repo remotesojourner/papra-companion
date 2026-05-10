@@ -5,7 +5,7 @@
     <Found Context="routeData">
         @if (OidcOptions.Enabled)
         {
-            <AuthorizeRouteView RouteData="routeData" Defau ltLayout="typeof(Layout.MainLayout)">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
                 <NotAuthorized>
                     <RedirectToLogin />
                 </NotAuthorized>
