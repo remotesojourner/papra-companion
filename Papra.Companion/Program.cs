@@ -3,7 +3,9 @@ using Flowbite.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Papra.Companion;
 using Papra.Companion.BackgroundServices;
@@ -15,7 +17,6 @@ using Papra.Companion.Data.Repositories.Interfaces;
 using Papra.Companion.Models;
 using Papra.Companion.Services;
 using Papra.Companion.Services.Interfaces;
-
 
 var appStartTime = DateTimeOffset.UtcNow;
 
@@ -38,7 +39,14 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
 // Pre-create attachments folder under content root
 Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, AppPaths.AttachmentsFolder));
 
-// Persist Data Protection keys to the data folder so antiforgery tokens survive container restarts
+// Trust forwarded headers from the reverse proxy (Docker network)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                             | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 var keysPath = Path.Combine(builder.Environment.ContentRootPath, AppPaths.DataFolder, AppPaths.KeysFolder);
 Directory.CreateDirectory(keysPath);
 builder.Services.AddDataProtection()
@@ -91,7 +99,7 @@ builder.Services.AddAuthorization(options =>
 {
     if (oidcEnabled)
     {
-        options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        options.FallbackPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .Build();
     }
@@ -119,10 +127,7 @@ builder.Services.AddHostedService<EmailAttachmentBackgroundService>();
 
 var app = builder.Build();
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
-});
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -142,7 +147,7 @@ if (oidcEnabled)
         new AuthenticationProperties { RedirectUri = "/" },
         [OpenIdConnectDefaults.AuthenticationScheme]));
 
-    app.MapGet("/auth/logout", async (HttpContext context) =>
+    app.MapGet("/auth/logout", async context =>
     {
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
