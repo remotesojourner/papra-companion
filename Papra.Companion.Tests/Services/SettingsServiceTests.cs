@@ -23,6 +23,7 @@ public class SettingsServiceTests
         var current = service.Current;
 
         Assert.Equal(string.Empty, current.PapraBaseUrl);
+        Assert.Equal(string.Empty, current.OpenAiBaseUrl);
         Assert.Equal("gpt-4o-mini", current.OpenAiModel);
         Assert.Equal(PipelineSettings.DefaultTitlePrompt, current.TitlePrompt);
         Assert.Equal(PipelineSettings.DefaultTagPrompt, current.TagPrompt);
@@ -36,6 +37,7 @@ public class SettingsServiceTests
         {
             PapraBaseUrl = "https://papra.example.com",
             PapraApiToken = "tok",
+            OpenAiBaseUrl = "http://localhost:11434/v1/",
             OpenAiApiKey = "sk-key",
             OpenAiModel = "gpt-4o",
             MistralApiKey = "mist",
@@ -51,6 +53,7 @@ public class SettingsServiceTests
 
         Assert.Equal("https://papra.example.com", current.PapraBaseUrl);
         Assert.Equal("tok", current.PapraApiToken);
+        Assert.Equal("http://localhost:11434/v1/", current.OpenAiBaseUrl);
         Assert.Equal("sk-key", current.OpenAiApiKey);
         Assert.Equal("gpt-4o", current.OpenAiModel);
         Assert.Equal("mist", current.MistralApiKey);
@@ -81,10 +84,12 @@ public class SettingsServiceTests
         service.Save(new PipelineSettings
         {
             PapraBaseUrl = "https://new.example.com",
+            OpenAiBaseUrl = "http://localhost:11434/v1/",
             OpenAiApiKey = "sk-new"
         });
 
         Assert.Equal("https://new.example.com", service.Current.PapraBaseUrl);
+        Assert.Equal("http://localhost:11434/v1/", service.Current.OpenAiBaseUrl);
         Assert.Equal("sk-new", service.Current.OpenAiApiKey);
     }
 

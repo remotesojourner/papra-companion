@@ -8,6 +8,7 @@ public class PipelineSettings
 
     // ── AI services ───────────────────────────────────────────────────────────
     public string MistralApiKey { get; set; } = string.Empty;
+    public string OpenAiBaseUrl { get; set; } = string.Empty;
     public string OpenAiApiKey { get; set; } = string.Empty;
     public string OpenAiModel { get; set; } = "gpt-4o-mini";
 

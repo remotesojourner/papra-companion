@@ -136,11 +136,19 @@
                 <SectionHeader Icon="brain" Title="OpenAI" />
 
                 <div>
+                    <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Base URL (optional)</label>
+                    <TextInput @bind-Value="_settings.OpenAiBaseUrl"
+                               Placeholder="https://api.openai.com/v1/"
+                               InputType="text" />
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">Leave blank to use the official OpenAI API, or enter the base URL of a compatible API (e.g., LM Studio, Ollama, vLLM).</Paragraph>
+                </div>
+
+                <div>
                     <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">API Key <span class="text-red-500">*</span></label>
                     <TextInput @bind-Value="_settings.OpenAiApiKey"
                                Placeholder="@(_savedOpenAiKey ? "Already saved — enter a new key to replace" : "sk-...")"
                                InputType="password" />
-                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">Used to generate document titles, assign tags, and optionally perform OCR.</Paragraph>
+                    <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">Used to authenticate with the API.</Paragraph>
                 </div>
 
                 <div class="flex items-center gap-3">
@@ -156,16 +164,9 @@
 
                 <div>
                     <label class="block mb-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">Model</label>
-                    <select class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 bg-slate-50 text-slate-900
-                                   dark:border-slate-600 dark:bg-slate-700 dark:text-white
-                                   focus:ring-blue-500 focus:border-blue-500"
-                            value="@_settings.OpenAiModel"
-                            @onchange="OnModelChanged">
-                        @foreach (var m in OpenAiModels)
-                        {
-                            <option value="@m.Value">@m.Label</option>
-                        }
-                    </select>
+                    <TextInput @bind-Value="_settings.OpenAiModel"
+                               Placeholder="e.g. gpt-4o-mini"
+                               InputType="text" />
                     <Paragraph CustomClasses="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         Used for title extraction, tag suggestions, and OCR when no Mistral key is provided.
                     </Paragraph>
@@ -477,22 +478,7 @@
 
     private static readonly string[] Tabs = ["Papra", "AI Services", "AI Prompts", "Email"];
 
-    private record ModelOption(string Value, string Label);
-
-    private static readonly ModelOption[] OpenAiModels =
-    [
-        new("gpt-4.1",      "GPT-4.1 — flagship, best for complex tasks"),
-        new("gpt-4.1-mini", "GPT-4.1 Mini — balanced speed & capability"),
-        new("gpt-4.1-nano", "GPT-4.1 Nano — fastest & most affordable"),
-        new("gpt-4o",       "GPT-4o — multimodal, strong OCR"),
-        new("gpt-4o-mini",  "GPT-4o Mini — cost-efficient (recommended)"),
-        new("gpt-4-turbo",  "GPT-4 Turbo — high capability"),
-        new("o3",           "o3 — most powerful reasoning model"),
-        new("o3-mini",      "o3 Mini — reasoning, lower cost"),
-        new("o4-mini",      "o4 Mini — next-gen reasoning, efficient"),
-        new("gpt-5",        "GPT-5 — latest generation"),
-        new("gpt-5-mini",   "GPT-5 Mini — latest generation, lightweight"),
-    ];
+    // Unused models array removed since it is now a text input.
 
     private static readonly (string Token, string Description)[] TitlePlaceholders =
     [
@@ -579,8 +565,7 @@
     private void HandleSettingsChanged()
         => InvokeAsync(StateHasChanged);
 
-    private void OnModelChanged(ChangeEventArgs e)
-        => _settings.OpenAiModel = e.Value?.ToString() ?? "gpt-4o-mini";
+    // Removed OnModelChanged as it's no longer needed for text input.
 
     private void ResetTitlePrompt() => _settings.TitlePrompt = PipelineSettings.DefaultTitlePrompt;
     private void ResetTagPrompt()   => _settings.TagPrompt   = PipelineSettings.DefaultTagPrompt;
@@ -594,6 +579,7 @@
         if (string.IsNullOrWhiteSpace(settingsToSave.PapraApiToken)) settingsToSave.PapraApiToken = SettingsService.Current.PapraApiToken;
         if (string.IsNullOrWhiteSpace(settingsToSave.OpenAiApiKey))  settingsToSave.OpenAiApiKey  = SettingsService.Current.OpenAiApiKey;
         if (string.IsNullOrWhiteSpace(settingsToSave.MistralApiKey)) settingsToSave.MistralApiKey = SettingsService.Current.MistralApiKey;
+        if (string.IsNullOrWhiteSpace(settingsToSave.OpenAiBaseUrl)) settingsToSave.OpenAiBaseUrl = _settings.OpenAiBaseUrl;
 
         var emailToSave = CopyEmail(_email);
         if (string.IsNullOrWhiteSpace(emailToSave.Password)) emailToSave.Password = EmailSettingsService.Current.Password;
@@ -649,9 +635,10 @@
     {
         _openAiTestRunning = true; _openAiTestResult = null; StateHasChanged();
         var key = string.IsNullOrWhiteSpace(_settings.OpenAiApiKey) ? SettingsService.Current.OpenAiApiKey : _settings.OpenAiApiKey;
+        var baseUrl = string.IsNullOrWhiteSpace(_settings.OpenAiBaseUrl) ? SettingsService.Current.OpenAiBaseUrl : _settings.OpenAiBaseUrl;
         try
         {
-            _openAiTestResult = await OpenAiService.TestConnectionAsync(key, _settings.OpenAiModel, default);
+            _openAiTestResult = await OpenAiService.TestConnectionAsync(baseUrl, key, _settings.OpenAiModel, default);
             _openAiTestOk = true;
         }
         catch (Exception) { _openAiTestResult = "Failed"; _openAiTestOk = false; }
@@ -698,6 +685,7 @@
         PapraBaseUrl  = src.PapraBaseUrl,
         PapraApiToken = src.PapraApiToken,
         MistralApiKey = src.MistralApiKey,
+        OpenAiBaseUrl = src.OpenAiBaseUrl,
         OpenAiApiKey  = src.OpenAiApiKey,
         OpenAiModel   = src.OpenAiModel,
         TitlePrompt   = src.TitlePrompt,

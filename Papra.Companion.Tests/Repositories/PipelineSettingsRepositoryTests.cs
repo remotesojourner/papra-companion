@@ -30,6 +30,7 @@ public class PipelineSettingsRepositoryTests
         var entity = new PipelineSettingsEntity
         {
             PapraBaseUrl = "https://papra.example.com",
+            OpenAiBaseUrl = "http://localhost:11434/v1/",
             OpenAiApiKey = "sk-key",
             OpenAiModel = "gpt-4o",
         };
@@ -39,6 +40,7 @@ public class PipelineSettingsRepositoryTests
 
         Assert.NotNull(result);
         Assert.Equal("https://papra.example.com", result.PapraBaseUrl);
+        Assert.Equal("http://localhost:11434/v1/", result.OpenAiBaseUrl);
         Assert.Equal("sk-key", result.OpenAiApiKey);
         Assert.Equal("gpt-4o", result.OpenAiModel);
     }
@@ -59,6 +61,7 @@ public class PipelineSettingsRepositoryTests
         {
             PapraBaseUrl = "https://updated.com",
             PapraApiToken = "new-token",
+            OpenAiBaseUrl = "http://localhost:11434/v1/",
             OpenAiApiKey = "sk-updated",
             OpenAiModel = "gpt-4o",
             MistralApiKey = "mist",
@@ -70,6 +73,7 @@ public class PipelineSettingsRepositoryTests
         var result = repo.Get()!;
         Assert.Equal("https://updated.com", result.PapraBaseUrl);
         Assert.Equal("new-token", result.PapraApiToken);
+        Assert.Equal("http://localhost:11434/v1/", result.OpenAiBaseUrl);
         Assert.Equal("sk-updated", result.OpenAiApiKey);
         Assert.Equal("gpt-4o", result.OpenAiModel);
         Assert.Equal("mist", result.MistralApiKey);

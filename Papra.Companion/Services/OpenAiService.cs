@@ -10,6 +10,14 @@ public class OpenAiService(ISettingsService settingsService) : IOpenAiService
     private HttpClient CreateClient(bool longRunning = false)
     {
         var client = new HttpClient();
+        
+        var baseUrl = settingsService.Current.OpenAiBaseUrl;
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            baseUrl = OpenAiConstants.DefaultBaseUrl;
+        else if (!baseUrl.EndsWith('/'))
+            baseUrl += "/";
+            
+        client.BaseAddress = new Uri(baseUrl);
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", settingsService.Current.OpenAiApiKey);
         if (longRunning)
@@ -123,10 +131,18 @@ public class OpenAiService(ISettingsService settingsService) : IOpenAiService
         return text?.Trim() ?? string.Empty;
     }
 
-    public async Task<string> TestConnectionAsync(string apiKey, string model, CancellationToken ct)
+    public async Task<string> TestConnectionAsync(string baseUrl, string apiKey, string model, CancellationToken ct)
     {
         using var client = new HttpClient();
+        
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            baseUrl = OpenAiConstants.DefaultBaseUrl;
+        else if (!baseUrl.EndsWith('/'))
+            baseUrl += "/";
+            
+        client.BaseAddress = new Uri(baseUrl);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        
         var response = await client.GetAsync(OpenAiConstants.ModelsEndpoint, ct);
         return !response.IsSuccessStatusCode
             ? throw new HttpRequestException($"HTTP {(int)response.StatusCode}", null, response.StatusCode)

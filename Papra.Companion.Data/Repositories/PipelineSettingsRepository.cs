@@ -28,6 +28,7 @@ public class PipelineSettingsRepository(IDbContextFactory<AppDbContext> dbFactor
             existing.PapraBaseUrl = entity.PapraBaseUrl;
             existing.PapraApiToken = entity.PapraApiToken;
             existing.MistralApiKey = entity.MistralApiKey;
+            existing.OpenAiBaseUrl = entity.OpenAiBaseUrl;
             existing.OpenAiApiKey = entity.OpenAiApiKey;
             existing.OpenAiModel = entity.OpenAiModel;
             existing.TitlePrompt = entity.TitlePrompt;
