@@ -12,16 +12,15 @@ internal sealed record MistralOcrRequest(
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(MistralImageDocument),    typeDiscriminator: "image_url")]
 [JsonDerivedType(typeof(MistralDocumentUrlDoc),   typeDiscriminator: "document_url")]
-internal abstract record MistralDocument(
-    [property: JsonPropertyName("type")] string Type);
+internal abstract record MistralDocument();
 
 internal sealed record MistralImageDocument(
     [property: JsonPropertyName("image_url")] string ImageUrl)
-    : MistralDocument("image_url");
+    : MistralDocument();
 
 internal sealed record MistralDocumentUrlDoc(
     [property: JsonPropertyName("document_url")] string DocumentUrl)
-    : MistralDocument("document_url");
+    : MistralDocument();
 
 // ── Responses ───────────────────────────────────────────────────────────────
 
