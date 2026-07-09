@@ -1,3 +1,5 @@
+### This repository is now deprecated. Papra supports these features now so there is no need for a separate app. 
+
 <p align="center">
   <img src="Papra.Companion/wwwroot/logo.svg" alt="Papra Companion Logo" width="160" />
 </p>
