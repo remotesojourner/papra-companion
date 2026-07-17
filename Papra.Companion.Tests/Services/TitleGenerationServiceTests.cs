@@ -44,7 +44,7 @@ public class TitleGenerationServiceTests
         var job = new ProcessingJob { DocumentId = "doc1", OrganizationId = "org1" };
 
         papra.GetDocumentInfoAsync("org1", "doc1", Arg.Any<CancellationToken>())
-            .Returns(("invoice.pdf", "image/jpeg"));
+            .Returns(("invoice.pdf", "Extracted text content"));
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<object?>(), Arg.Any<CancellationToken>())
             .Returns("{\"title\":\"Generated Title\"}");
 
@@ -52,7 +52,7 @@ public class TitleGenerationServiceTests
 
         await papra.Received(1).UpdateDocumentTitleAsync("org1", "doc1", "Generated Title", Arg.Any<CancellationToken>());
         status.Received(1).JobCompleted(Arg.Is<PipelineJobResult>(r =>
-            r.Status == JobStatus.Succeeded &&
+            r!.Status == JobStatus.Succeeded &&
             r.ExtractedTitle == "Generated Title"));
     }
 
@@ -63,7 +63,7 @@ public class TitleGenerationServiceTests
         var job = new ProcessingJob { DocumentId = "doc2", OrganizationId = "org1" };
 
         papra.GetDocumentInfoAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(("file.pdf", "application/pdf"));
+            .Returns(("file.pdf", "Content"));
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<object?>(), Arg.Any<CancellationToken>())
             .Returns("{\"title\":\"\"}");  // empty title
 
@@ -74,7 +74,7 @@ public class TitleGenerationServiceTests
             Arg.Any<string>(), Arg.Any<string>(),
             Arg.Is<string>(t => t == "Untitled Document" || t == ""),
             Arg.Any<CancellationToken>());
-        status.Received(1).JobCompleted(Arg.Is<PipelineJobResult>(r => r.Status == JobStatus.Succeeded));
+        status.Received(1).JobCompleted(Arg.Is<PipelineJobResult>(r => r!.Status == JobStatus.Succeeded));
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class TitleGenerationServiceTests
         await svc.ProcessAsync(job, CancellationToken.None);
 
         status.Received(1).JobCompleted(Arg.Is<PipelineJobResult>(r =>
-            r.Status == JobStatus.Failed &&
+            r!.Status == JobStatus.Failed &&
             r.ErrorMessage == "Papra unreachable"));
     }
 
@@ -106,7 +106,7 @@ public class TitleGenerationServiceTests
         await svc.ProcessAsync(job, cts.Token);
 
         status.Received(1).JobCompleted(Arg.Is<PipelineJobResult>(r =>
-            r.Status == JobStatus.Failed &&
+            r!.Status == JobStatus.Failed &&
             r.ErrorMessage == "Operation was cancelled."));
     }
 
@@ -132,7 +132,7 @@ public class TitleGenerationServiceTests
         var job = new ProcessingJob { DocumentId = "doc6", OrganizationId = "org1" };
 
         papra.GetDocumentInfoAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(("file.pdf", "image/png"));
+            .Returns(("file.pdf", "Content"));
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<object?>(), Arg.Any<CancellationToken>())
             .Returns("{\"title\":\"Title\"}");
 
@@ -151,7 +151,7 @@ public class TitleGenerationServiceTests
         var job = new ProcessingJob { DocumentId = "doc7", OrganizationId = "org1" };
 
         papra.GetDocumentInfoAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(("My Invoice.pdf", "image/png"));
+            .Returns(("My Invoice.pdf", "Content"));
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<object?>(), Arg.Any<CancellationToken>())
             .Returns("{\"title\":\"Title\"}");
 
@@ -159,7 +159,7 @@ public class TitleGenerationServiceTests
 
         // The prompt sent to the AI must contain the actual document name
         await openAi.Received(1).CompleteAsync(
-            Arg.Is<string>(p => p.Contains("My Invoice.pdf")),
+            Arg.Is<string>(p => p!.Contains("My Invoice.pdf")),
             Arg.Any<object?>(),
             Arg.Any<CancellationToken>());
     }

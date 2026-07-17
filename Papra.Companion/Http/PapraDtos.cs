@@ -9,7 +9,7 @@ internal sealed record PapraDocumentResponse(
 
 internal sealed record PapraDocumentInfo(
     [property: JsonPropertyName("name")]     string Name,
-    [property: JsonPropertyName("mimeType")] string MimeType);
+    [property: JsonPropertyName("content")]  string? Content);
 
 // ── Requests ────────────────────────────────────────────────────────────────
 

@@ -34,11 +34,12 @@ public partial class TitleGenerationService(
                 await Task.Delay(TimeSpan.FromSeconds(settings.ProcessingDelaySeconds), ct);
             }
 
-            var (docName, _) = await papraService.GetDocumentInfoAsync(job.OrganizationId, job.DocumentId, ct);
+            var (docName, docContent) = await papraService.GetDocumentInfoAsync(job.OrganizationId, job.DocumentId, ct);
             LogGotDocumentInfo(logger, docName);
 
             var titlePrompt = settings.TitlePrompt
-                .Replace("{{original_title}}", docName);
+                .Replace("{{original_title}}", docName)
+                .Replace("{{content}}", docContent ?? string.Empty);
 
             var titleSchema = new
             {

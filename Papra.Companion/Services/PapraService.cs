@@ -17,7 +17,7 @@ public class PapraService(ISettingsService settingsService) : IPapraService
 
     private string BaseUrl => settingsService.Current.PapraBaseUrl.TrimEnd('/');
 
-    public async Task<(string Name, string MimeType)> GetDocumentInfoAsync(string orgId, string docId, CancellationToken ct)
+    public async Task<(string Name, string? Content)> GetDocumentInfoAsync(string orgId, string docId, CancellationToken ct)
     {
         using var client = CreateClient();
         var response = await client.GetAsync($"{BaseUrl}{string.Format(PapraConstants.DocumentsRoute, orgId, docId)}", ct);
@@ -30,7 +30,7 @@ public class PapraService(ISettingsService settingsService) : IPapraService
         }
 
         var result = await response.Content.ReadFromJsonAsync<PapraDocumentResponse>(ct);
-        return (result!.Document.Name, result.Document.MimeType);
+        return (result!.Document.Name, result.Document.Content);
     }
 
     public async Task UpdateDocumentTitleAsync(string orgId, string docId, string name, CancellationToken ct)

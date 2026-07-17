@@ -113,6 +113,6 @@ public class WebhookEndpointTests : IClassFixture<WebApplicationFactory<Program>
         Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
         
         await _pipelineQueueMock.Received(1).EnqueueAsync(Arg.Is<ProcessingJob>(j => 
-            j.OrganizationId == "org-123" && j.DocumentId == "doc-456"), CancellationToken.None);
+            j!.OrganizationId == "org-123" && j.DocumentId == "doc-456"), CancellationToken.None);
     }
 }

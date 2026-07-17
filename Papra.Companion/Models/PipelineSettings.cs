@@ -27,7 +27,7 @@ public class PipelineSettings
     // ── Default prompts ───────────────────────────────────────────────────────
     public const string DefaultTitlePrompt =
         """
-        I will provide you with the name of a document.
+        I will provide you with the name and extracted text content of a document.
         Your task is to find a suitable document title that I can use as the title in my document management system.
         If the original title is already adding value and not just a technical filename you can use it as a base.
         Respond only with the title, without any additional information.
@@ -35,5 +35,8 @@ public class PipelineSettings
         The data will be provided using an XML-like format for clarity:
 
         <original_title>{{original_title}}</original_title>
+        <content>
+        {{content}}
+        </content>
         """;
 }

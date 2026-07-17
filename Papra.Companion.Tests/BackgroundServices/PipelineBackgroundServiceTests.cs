@@ -28,7 +28,7 @@ public class PipelineBackgroundServiceTests
         catch (OperationCanceledException) { }
 
         await pipeline.Received(1).ProcessAsync(
-            Arg.Is<ProcessingJob>(j => j.DocumentId == "doc1"),
+            Arg.Is<ProcessingJob>(j => j!.DocumentId == "doc1"),
             Arg.Any<CancellationToken>());
     }
 
