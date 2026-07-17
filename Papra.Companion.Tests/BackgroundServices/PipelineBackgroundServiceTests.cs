@@ -14,7 +14,7 @@ public class PipelineBackgroundServiceTests
         var job = new ProcessingJob { DocumentId = "doc1", OrganizationId = "org1" };
         await queue.EnqueueAsync(job, TestContext.Current.CancellationToken);
 
-        var pipeline = Substitute.For<IDocumentPipelineService>();
+        var pipeline = Substitute.For<ITitleGenerationService>();
         var services = BuildServiceProvider(pipeline);
         var logger = Microsoft.Extensions.Logging.Abstractions.NullLogger<PipelineBackgroundService>.Instance;
         var svc = new PipelineBackgroundService(queue, services, logger);
@@ -42,7 +42,7 @@ public class PipelineBackgroundServiceTests
         await queue.EnqueueAsync(job2, TestContext.Current.CancellationToken);
 
         var callCount = 0;
-        var pipeline = Substitute.For<IDocumentPipelineService>();
+        var pipeline = Substitute.For<ITitleGenerationService>();
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
         pipeline.When(p => p.ProcessAsync(Arg.Any<ProcessingJob>(), Arg.Any<CancellationToken>()))
@@ -67,7 +67,7 @@ public class PipelineBackgroundServiceTests
     public async Task ExecuteAsync_WhenCancelled_StopsGracefully()
     {
         var queue = new TestPipelineQueue(); // empty — will block on ReadAllAsync
-        var pipeline = Substitute.For<IDocumentPipelineService>();
+        var pipeline = Substitute.For<ITitleGenerationService>();
         var services = BuildServiceProvider(pipeline);
         var logger = Microsoft.Extensions.Logging.Abstractions.NullLogger<PipelineBackgroundService>.Instance;
         var svc = new PipelineBackgroundService(queue, services, logger);
@@ -80,10 +80,10 @@ public class PipelineBackgroundServiceTests
         Assert.True(svc.ExecuteTask!.IsCompleted);
     }
 
-    private static ServiceProvider BuildServiceProvider(IDocumentPipelineService pipeline)
+    private static ServiceProvider BuildServiceProvider(ITitleGenerationService pipeline)
     {
         var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
-        services.AddScoped<IDocumentPipelineService>(_ => pipeline);
+        services.AddScoped<ITitleGenerationService>(_ => pipeline);
         return services.BuildServiceProvider();
     }
 

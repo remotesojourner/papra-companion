@@ -9,9 +9,9 @@ public class PipelineSettingsTests
     {
         var settings = new PipelineSettings
         {
-            PapraBaseUrl = "https://papra.example.com",
+            PapraBaseUrl  = "https://papra.example.com",
             PapraApiToken = "token123",
-            OpenAiApiKey = "sk-abc"
+            OpenAiApiKey  = "sk-abc"
         };
 
         Assert.True(settings.IsConfigured);
@@ -26,38 +26,24 @@ public class PipelineSettingsTests
     {
         var settings = new PipelineSettings
         {
-            PapraBaseUrl = baseUrl,
+            PapraBaseUrl  = baseUrl,
             PapraApiToken = token,
-            OpenAiApiKey = openAiKey
+            OpenAiApiKey  = openAiKey
         };
 
         Assert.False(settings.IsConfigured);
     }
 
     [Fact]
-    public void UseOpenAiForOcr_WhenMistralKeyEmpty_ReturnsTrue()
-    {
-        var settings = new PipelineSettings { MistralApiKey = string.Empty };
-        Assert.True(settings.UseOpenAiForOcr);
-    }
-
-    [Fact]
-    public void UseOpenAiForOcr_WhenMistralKeySet_ReturnsFalse()
-    {
-        var settings = new PipelineSettings { MistralApiKey = "mistral-key" };
-        Assert.False(settings.UseOpenAiForOcr);
-    }
-
-    [Fact]
-    public void DefaultPrompts_ContainExpectedPlaceholders()
+    public void DefaultTitlePrompt_ContainsOriginalTitlePlaceholder()
     {
         Assert.Contains("{{original_title}}", PipelineSettings.DefaultTitlePrompt);
-        Assert.Contains("{{content}}", PipelineSettings.DefaultTitlePrompt);
+    }
 
-        Assert.Contains("{{available_tags}}", PipelineSettings.DefaultTagPrompt);
-        Assert.Contains("{{original_title}}", PipelineSettings.DefaultTagPrompt);
-        Assert.Contains("{{content}}", PipelineSettings.DefaultTagPrompt);
-
-        Assert.NotEmpty(PipelineSettings.DefaultOcrPrompt);
+    [Fact]
+    public void ProcessingDelaySeconds_DefaultsToZero()
+    {
+        var settings = new PipelineSettings();
+        Assert.Equal(0, settings.ProcessingDelaySeconds);
     }
 }

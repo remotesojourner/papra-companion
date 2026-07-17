@@ -59,15 +59,13 @@ public class PipelineSettingsRepositoryTests
 
         await repo.UpsertAsync(new PipelineSettingsEntity
         {
-            PapraBaseUrl = "https://updated.com",
+            PapraBaseUrl  = "https://updated.com",
             PapraApiToken = "new-token",
             OpenAiBaseUrl = "http://localhost:11434/v1/",
-            OpenAiApiKey = "sk-updated",
-            OpenAiModel = "gpt-4o",
-            MistralApiKey = "mist",
-            TitlePrompt = "new title prompt",
-            TagPrompt = "new tag prompt",
-            OcrPrompt = "new ocr prompt",
+            OpenAiApiKey  = "sk-updated",
+            OpenAiModel   = "gpt-4o",
+            TitlePrompt   = "new title prompt",
+            ProcessingDelaySeconds = 15,
         });
 
         var result = repo.Get()!;
@@ -76,8 +74,8 @@ public class PipelineSettingsRepositoryTests
         Assert.Equal("http://localhost:11434/v1/", result.OpenAiBaseUrl);
         Assert.Equal("sk-updated", result.OpenAiApiKey);
         Assert.Equal("gpt-4o", result.OpenAiModel);
-        Assert.Equal("mist", result.MistralApiKey);
         Assert.Equal("new title prompt", result.TitlePrompt);
+        Assert.Equal(15, result.ProcessingDelaySeconds);
     }
 
     [Fact]

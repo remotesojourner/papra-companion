@@ -15,17 +15,14 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 
 ## Features
 
-- **Webhook-driven AI pipeline** — receives a webhook from Papra on every document upload and automatically:
-  1. Downloads the document file and metadata via the Papra API
-  2. Performs OCR / text extraction (via Mistral OCR or OpenAI vision)
-  3. Generates a descriptive document title using OpenAI
-  4. Selects matching tags from your Papra tag library using OpenAI
-  5. Writes the title and tags back to Papra
+- **Title Generation** — receives a webhook from Papra on every document upload and automatically:
+  1. Downloads the document metadata via the Papra API
+  2. Generates a descriptive document title using any OpenAI-compatible API
+  3. Writes the title back to Papra
 - **Email attachment downloader** — polls an IMAP mailbox on a configurable schedule, downloads matching attachments, and saves them to Papra's watched folder
   - Subject-line regex filtering (with optional case-insensitive / match-anywhere modes)
   - Custom filename templates
   - Optional delete-after-download (with copy-to-folder support)
-- **Pipeline dashboard** — real-time job status, success/failure badges, extracted titles, and per-job timings
 
 ---
 
@@ -34,8 +31,7 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 | Requirement | Notes |
 |---|---|
 | [Papra](https://github.com/papra-hq/papra) instance | Must be reachable from the Companion container |
-| OpenAI API key | Required for title extraction and tag suggestion |
-| Mistral API key | Optional — enables Mistral OCR (falls back to OpenAI vision if absent) |
+| OpenAI API Key | Required for title generation. Works with any OpenAI-compatible API |
 | Docker + Docker Compose | Recommended deployment method |
 
 ---
@@ -62,18 +58,7 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
    - `./data` — stores the SQLite database and Data Protection keys on the host next to your compose file. Created automatically on first run.
    - `/path/to/papra/ingestion` — replace this with the path to the folder that Papra watches for new documents. Please note that it needs to have the organisation id at the end. e.g. /papra/consume/org_bwnnm9xppyw81ru5r3wvvr5d. Any attachment downloaded from email will be dropped here and picked up by Papra automatically.
 
-2. **Set the environment variable to disable Papra's built-in content extraction**
-
-   In your Papra container configuration (not the Companion), add the following environment variable:
-
-   ```yaml
-   environment:
-     - DOCUMENTS_CONTENT_EXTRACTION_ENABLED=false
-   ```
-
-   This ensures that Papra Companion handles all content extraction and prevents duplicate processing by Papra itself.
-
-3. **Start the stack**
+2. **Start the stack**
 
    ```bash
    docker compose up -d
@@ -81,13 +66,15 @@ A self-hosted Blazor Server companion application for [Papra](https://github.com
 
    The app will be available on port `1003` of the host you deployed it on (e.g. `http://192.168.1.100:1003`).
 
-4. **Configure via the Settings page**
+3. **Configure via the Settings page**
 
-   Open the browser, navigate to **Settings**, and complete the four configuration tabs (see [Configuration](#configuration) below).
+   Open the browser, navigate to **Settings**, and complete the configuration tabs (see [Configuration](#configuration) below).
+   > [!IMPORTANT]
+   > Make sure to set a **Processing Delay** (e.g. 15-30 seconds) in the AI Services tab. This gives Papra enough time to finish indexing the document content before the Companion asks the AI to generate a title.
 
-5. **Register the webhook in Papra**
+4. **Register the webhook in Papra**
 
-   In Papra, go to **Settings → Webhooks** and add the webhook URL displayed on the Papra settings tab in the Companion. The exact URL is shown there ready to copy. When configuring the webhook, make sure to select only the **Document created** event — that is the only event Papra Companion handles. From this point on, every document uploaded to Papra will automatically be processed by the pipeline.
+   In Papra, go to **Settings → Webhooks** and add the webhook URL displayed on the Papra settings tab in the Companion. The exact URL is shown there ready to copy. When configuring the webhook, make sure to select only the **Document created** event — that is the only event Papra Companion handles. From this point on, every document uploaded to Papra will automatically be processed by the title generation service.
 
 ---
 
@@ -144,22 +131,11 @@ Use the **Test Connection** button to verify that the Companion can reach your P
 
 | Field | Description |
 |---|---|
-| **OpenAI API Key** | Required. Used for title generation, tag suggestion, and OCR fallback |
-| **OpenAI Model** | Model name, e.g. `gpt-4o-mini` (default) or select another from the dropdown |
-| **Mistral API Key** | Optional. When present, Mistral OCR is used for text extraction instead of OpenAI vision |
-
-
-### Tab: AI Prompts
-
-Fully customizable system prompts sent to OpenAI. Three prompts are configurable:
-
-| Prompt | Purpose | Available placeholders |
-|---|---|---|
-| **Title prompt** | Instructs the model to produce a document title | `{{original_title}}`, `{{content}}` |
-| **Tag prompt** | Instructs the model to select tags from the available list | `{{available_tags}}`, `{{original_title}}`, `{{content}}` |
-| **OCR prompt** | Instructs the model to extract plain text from the document | *(none)* |
-
-Default prompts are provided and can be restored at any time.
+| **OpenAI API Key** | Required. Used for title generation |
+| **OpenAI Base URL** | Optional. Set this to use an alternative OpenAI-compatible provider (e.g. Ollama, LiteLLM) |
+| **OpenAI Model** | Model name, e.g. `gpt-4o-mini` (default) |
+| **Processing Delay** | Number of seconds to wait before processing a document |
+| **Title Extraction Prompt** | Customize the prompt sent to the model |
 
 ### Tab: Email
 
@@ -244,7 +220,7 @@ Two reasons:
 
 **Email injection** — Papra supports email-based document injection, but that requires either [OWLRelay](https://owlrelay.email/) or your own Cloudflare Worker. I wanted a much simpler self-hosted approach: a dedicated IMAP inbox I can forward emails to. Papra Companion polls that inbox on a schedule, downloads any matching attachments straight into Papra's watched folder, and optionally deletes or moves the email afterwards. No third-party relay service, no Cloudflare account, no extra infrastructure.
 
-**OCR, automated titles, and tags** — Papra already does OCR when you upload a document, but the extracted text is only used for search — titles and tags still need to be set manually. I didn't want to do that for every document. Papra Companion intercepts the webhook fired on each upload, runs the document through OCR (Mistral OCR when configured, OpenAI vision as a fallback), then uses an LLM to generate a descriptive title and select the most relevant tags from your Papra library automatically. Mistral OCR in particular produces noticeably better results than general-purpose OCR for dense or complex documents, and at a very low cost per page.
+**Automated titles** — Papra handles document ingestion, but titles often need to be set manually or cleaned up. I didn't want to do that for every document. Papra Companion intercepts the webhook fired on each upload, then uses an LLM to generate a descriptive, clean title automatically.
 
 ---
 
@@ -264,4 +240,4 @@ Quality is subjective. I have been working with C# for over two decades. All the
 
 If I come across a new idea or receive a suggestion that fits into a document-processing workflow, I will consider adding it. No roadmap or guarantees — this project exists to solve my own needs first.
 
-One area I do intend to expand is **AI service support**. Currently only OpenAI and Mistral are supported, but I plan to add support for more providers and models over time — including self-hosted LLM servers. For now, what is implemented covers my needs. If this is something you need sooner, I am happy to review and merge a well-structured PR for it.
+The system natively supports any OpenAI-compatible API, meaning you can plug in local models via Ollama, use API gateways like LiteLLM, or connect to alternative providers that support the OpenAI spec.

@@ -25,15 +25,13 @@ public class PipelineSettingsRepository(IDbContextFactory<AppDbContext> dbFactor
         }
         else
         {
-            existing.PapraBaseUrl = entity.PapraBaseUrl;
-            existing.PapraApiToken = entity.PapraApiToken;
-            existing.MistralApiKey = entity.MistralApiKey;
-            existing.OpenAiBaseUrl = entity.OpenAiBaseUrl;
-            existing.OpenAiApiKey = entity.OpenAiApiKey;
-            existing.OpenAiModel = entity.OpenAiModel;
-            existing.TitlePrompt = entity.TitlePrompt;
-            existing.TagPrompt = entity.TagPrompt;
-            existing.OcrPrompt = entity.OcrPrompt;
+            existing.PapraBaseUrl            = entity.PapraBaseUrl;
+            existing.PapraApiToken           = entity.PapraApiToken;
+            existing.OpenAiBaseUrl           = entity.OpenAiBaseUrl;
+            existing.OpenAiApiKey            = entity.OpenAiApiKey;
+            existing.OpenAiModel             = entity.OpenAiModel;
+            existing.TitlePrompt             = entity.TitlePrompt;
+            existing.ProcessingDelaySeconds  = entity.ProcessingDelaySeconds;
         }
         await db.SaveChangesAsync();
     }

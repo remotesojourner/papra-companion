@@ -25,12 +25,13 @@ public class OpenAiService(ISettingsService settingsService) : IOpenAiService
         return client;
     }
 
-    public async Task<string> CompleteAsync(string prompt, CancellationToken ct)
+    public async Task<string> CompleteAsync(string prompt, object? responseFormat, CancellationToken ct)
     {
         using var client = CreateClient();
         var request = new ChatCompletionRequest(
             Model: settingsService.Current.OpenAiModel,
-            Messages: [new ChatRequestMessage(Role: "user", Content: prompt)]);
+            Messages: [new ChatRequestMessage(Role: "user", Content: prompt)],
+            ResponseFormat: responseFormat);
 
         var response = await client.PostAsJsonAsync(OpenAiConstants.ChatCompletionsEndpoint, request, ct);
         if (!response.IsSuccessStatusCode)

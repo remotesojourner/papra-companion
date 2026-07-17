@@ -26,8 +26,7 @@ public class SettingsServiceTests
         Assert.Equal(string.Empty, current.OpenAiBaseUrl);
         Assert.Equal("gpt-4o-mini", current.OpenAiModel);
         Assert.Equal(PipelineSettings.DefaultTitlePrompt, current.TitlePrompt);
-        Assert.Equal(PipelineSettings.DefaultTagPrompt, current.TagPrompt);
-        Assert.Equal(PipelineSettings.DefaultOcrPrompt, current.OcrPrompt);
+        Assert.Equal(0, current.ProcessingDelaySeconds);
     }
 
     [Fact]
@@ -35,15 +34,13 @@ public class SettingsServiceTests
     {
         var entity = new PipelineSettingsEntity
         {
-            PapraBaseUrl = "https://papra.example.com",
-            PapraApiToken = "tok",
-            OpenAiBaseUrl = "http://localhost:11434/v1/",
-            OpenAiApiKey = "sk-key",
-            OpenAiModel = "gpt-4o",
-            MistralApiKey = "mist",
-            TitlePrompt = "title prompt",
-            TagPrompt = "tag prompt",
-            OcrPrompt = "ocr prompt",
+            PapraBaseUrl           = "https://papra.example.com",
+            PapraApiToken          = "tok",
+            OpenAiBaseUrl          = "http://localhost:11434/v1/",
+            OpenAiApiKey           = "sk-key",
+            OpenAiModel            = "gpt-4o",
+            TitlePrompt            = "title prompt",
+            ProcessingDelaySeconds = 30,
         };
         var repo = Substitute.For<IPipelineSettingsRepository>();
         repo.Get().Returns(entity);
@@ -56,24 +53,20 @@ public class SettingsServiceTests
         Assert.Equal("http://localhost:11434/v1/", current.OpenAiBaseUrl);
         Assert.Equal("sk-key", current.OpenAiApiKey);
         Assert.Equal("gpt-4o", current.OpenAiModel);
-        Assert.Equal("mist", current.MistralApiKey);
         Assert.Equal("title prompt", current.TitlePrompt);
-        Assert.Equal("tag prompt", current.TagPrompt);
-        Assert.Equal("ocr prompt", current.OcrPrompt);
+        Assert.Equal(30, current.ProcessingDelaySeconds);
     }
 
     [Fact]
-    public void Current_WhenRepositoryHasEmptyPrompts_FallsBackToDefaults()
+    public void Current_WhenRepositoryHasEmptyTitlePrompt_FallsBackToDefault()
     {
-        var entity = new PipelineSettingsEntity { TitlePrompt = "", TagPrompt = "  ", OcrPrompt = "" };
+        var entity = new PipelineSettingsEntity { TitlePrompt = "" };
         var repo = Substitute.For<IPipelineSettingsRepository>();
         repo.Get().Returns(entity);
 
         var service = new SettingsService(repo);
 
         Assert.Equal(PipelineSettings.DefaultTitlePrompt, service.Current.TitlePrompt);
-        Assert.Equal(PipelineSettings.DefaultTagPrompt, service.Current.TagPrompt);
-        Assert.Equal(PipelineSettings.DefaultOcrPrompt, service.Current.OcrPrompt);
     }
 
     [Fact]
@@ -83,14 +76,16 @@ public class SettingsServiceTests
 
         service.Save(new PipelineSettings
         {
-            PapraBaseUrl = "https://new.example.com",
+            PapraBaseUrl  = "https://new.example.com",
             OpenAiBaseUrl = "http://localhost:11434/v1/",
-            OpenAiApiKey = "sk-new"
+            OpenAiApiKey  = "sk-new",
+            ProcessingDelaySeconds = 10,
         });
 
         Assert.Equal("https://new.example.com", service.Current.PapraBaseUrl);
         Assert.Equal("http://localhost:11434/v1/", service.Current.OpenAiBaseUrl);
         Assert.Equal("sk-new", service.Current.OpenAiApiKey);
+        Assert.Equal(10, service.Current.ProcessingDelaySeconds);
     }
 
     [Fact]
