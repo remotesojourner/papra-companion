@@ -39,27 +39,23 @@ public class SettingsService : ISettingsService
     private static PipelineSettings? ToModel(PipelineSettingsEntity? e) =>
         e is null ? null : new()
         {
-            PapraBaseUrl = e.PapraBaseUrl,
-            PapraApiToken = e.PapraApiToken,
-            MistralApiKey = e.MistralApiKey,
-            OpenAiBaseUrl = e.OpenAiBaseUrl,
-            OpenAiApiKey = e.OpenAiApiKey,
-            OpenAiModel = e.OpenAiModel,
-            TitlePrompt = string.IsNullOrWhiteSpace(e.TitlePrompt) ? PipelineSettings.DefaultTitlePrompt : e.TitlePrompt,
-            TagPrompt = string.IsNullOrWhiteSpace(e.TagPrompt) ? PipelineSettings.DefaultTagPrompt : e.TagPrompt,
-            OcrPrompt = string.IsNullOrWhiteSpace(e.OcrPrompt) ? PipelineSettings.DefaultOcrPrompt : e.OcrPrompt,
+            PapraBaseUrl           = e.PapraBaseUrl,
+            PapraApiToken          = e.PapraApiToken,
+            OpenAiBaseUrl          = e.OpenAiBaseUrl,
+            OpenAiApiKey           = e.OpenAiApiKey,
+            OpenAiModel            = e.OpenAiModel,
+            TitlePrompt            = string.IsNullOrWhiteSpace(e.TitlePrompt) ? PipelineSettings.DefaultTitlePrompt : e.TitlePrompt,
+            ProcessingDelaySeconds = e.ProcessingDelaySeconds,
         };
 
     private static PipelineSettingsEntity ToEntity(PipelineSettings m) => new()
     {
-        PapraBaseUrl = m.PapraBaseUrl,
-        PapraApiToken = m.PapraApiToken,
-        MistralApiKey = m.MistralApiKey,
-        OpenAiBaseUrl = m.OpenAiBaseUrl,
-        OpenAiApiKey = m.OpenAiApiKey,
-        OpenAiModel = m.OpenAiModel,
-        TitlePrompt = m.TitlePrompt,
-        TagPrompt = m.TagPrompt,
-        OcrPrompt = m.OcrPrompt,
+        PapraBaseUrl           = m.PapraBaseUrl,
+        PapraApiToken          = m.PapraApiToken,
+        OpenAiBaseUrl          = m.OpenAiBaseUrl,
+        OpenAiApiKey           = m.OpenAiApiKey,
+        OpenAiModel            = m.OpenAiModel,
+        TitlePrompt            = m.TitlePrompt,
+        ProcessingDelaySeconds = m.ProcessingDelaySeconds,
     };
 }

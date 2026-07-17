@@ -15,7 +15,6 @@ public class SettingsPageTests : ComponentTestBase
     private readonly IEmailAttachmentSettingsService _emailSettingsSvc = default!;
     private readonly IPapraService _papraSvc = default!;
     private readonly IOpenAiService _openAiSvc = default!;
-    private readonly IMistralService _mistralSvc = default!;
     private readonly IEmailAttachmentService _emailAttachmentSvc = default!;
 
     public SettingsPageTests()
@@ -24,7 +23,6 @@ public class SettingsPageTests : ComponentTestBase
         _emailSettingsSvc = Substitute.For<IEmailAttachmentSettingsService>();
         _papraSvc = Substitute.For<IPapraService>();
         _openAiSvc = Substitute.For<IOpenAiService>();
-        _mistralSvc = Substitute.For<IMistralService>();
         _emailAttachmentSvc = Substitute.For<IEmailAttachmentService>();
 
         _settingsSvc.Current.Returns(new PipelineSettings());
@@ -34,7 +32,6 @@ public class SettingsPageTests : ComponentTestBase
         Services.AddSingleton(_emailSettingsSvc);
         Services.AddSingleton(_papraSvc);
         Services.AddSingleton(_openAiSvc);
-        Services.AddSingleton(_mistralSvc);
         Services.AddSingleton(_emailAttachmentSvc);
 
         // NavigationManager is required by the page to build _webhookUrl
@@ -124,15 +121,16 @@ public class SettingsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Settings_ClickAiPromptsTab_ShowsPromptFields()
+    public void Settings_ClickAiServicesTab_ShowsTitlePromptAndDelayFields()
     {
         var cut = Render<Settings>();
 
-        var tab = cut.FindAll("button").First(b => b.TextContent.Contains("AI Prompts"));
-        tab.Click();
+        var tabs = cut.FindAll("button").Where(b => b.TextContent.Contains("AI Services")).ToList();
+        Assert.Single(tabs);
+        tabs[0].Click();
 
         Assert.Contains("Title Extraction Prompt", cut.Markup);
-        Assert.Contains("Tag Selection Prompt", cut.Markup);
+        Assert.Contains("Processing Delay", cut.Markup);
     }
 
     [Fact]

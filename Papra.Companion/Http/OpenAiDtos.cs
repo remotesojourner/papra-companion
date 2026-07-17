@@ -6,7 +6,8 @@ namespace Papra.Companion.Http;
 
 internal sealed record ChatCompletionRequest(
     [property: JsonPropertyName("model")]    string Model,
-    [property: JsonPropertyName("messages")] ChatRequestMessage[] Messages);
+    [property: JsonPropertyName("messages")] ChatRequestMessage[] Messages,
+    [property: JsonPropertyName("response_format")] object? ResponseFormat = null);
 
 internal sealed record ChatRequestMessage(
     [property: JsonPropertyName("role")]    string Role,

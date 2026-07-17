@@ -114,8 +114,7 @@ builder.Services.AddSingleton<IPipelineStatusService, PipelineStatusService>();
 builder.Services.AddSingleton<IPipelineQueue, PipelineQueue>();
 builder.Services.AddScoped<IPapraService, PapraService>();
 builder.Services.AddScoped<IOpenAiService, OpenAiService>();
-builder.Services.AddScoped<IMistralService, MistralService>();
-builder.Services.AddScoped<IDocumentPipelineService, DocumentPipelineService>();
+builder.Services.AddScoped<ITitleGenerationService, TitleGenerationService>();
 builder.Services.AddHostedService<PipelineBackgroundService>();
 
 // Email attachment downloader services

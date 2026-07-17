@@ -9,14 +9,14 @@ public partial class PipelineBackgroundService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Document pipeline background service started");
+        logger.LogInformation("Title generation background service started");
 
         await foreach (var job in queue.ReadAllAsync(stoppingToken))
         {
             try
             {
                 using var scope = services.CreateScope();
-                var pipeline = scope.ServiceProvider.GetRequiredService<IDocumentPipelineService>();
+                var pipeline = scope.ServiceProvider.GetRequiredService<ITitleGenerationService>();
                 await pipeline.ProcessAsync(job, stoppingToken);
             }
             catch (OperationCanceledException)
@@ -29,7 +29,7 @@ public partial class PipelineBackgroundService(
             }
         }
 
-        logger.LogInformation("Document pipeline background service stopped");
+        logger.LogInformation("Title generation background service stopped");
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled error processing job for document {DocumentId}")]

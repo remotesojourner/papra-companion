@@ -2,7 +2,7 @@ using Papra.Companion.Models;
 
 namespace Papra.Companion.Services.Interfaces;
 
-public interface IDocumentPipelineService
+public interface ITitleGenerationService
 {
     Task ProcessAsync(ProcessingJob job, CancellationToken ct);
 }

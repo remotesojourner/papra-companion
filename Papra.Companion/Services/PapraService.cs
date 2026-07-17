@@ -33,65 +33,19 @@ public class PapraService(ISettingsService settingsService) : IPapraService
         return (result!.Document.Name, result.Document.MimeType);
     }
 
-    public async Task<byte[]> GetDocumentFileAsync(string orgId, string docId, CancellationToken ct)
-    {
-        using var client = CreateClient();
-        var response = await client.GetAsync($"{BaseUrl}{string.Format(PapraConstants.DocumentFileRoute, orgId, docId)}", ct);
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync(ct);
-            throw new HttpRequestException(
-                $"Papra get document file failed with {(int)response.StatusCode}: {errorBody}",
-                null, response.StatusCode);
-        }
-        return await response.Content.ReadAsByteArrayAsync(ct);
-    }
-
-    public async Task UpdateDocumentAsync(string orgId, string docId, string name, string content, CancellationToken ct)
+    public async Task UpdateDocumentTitleAsync(string orgId, string docId, string name, CancellationToken ct)
     {
         using var client = CreateClient();
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"{BaseUrl}{string.Format(PapraConstants.DocumentsRoute, orgId, docId)}")
         {
-            Content = JsonContent.Create(new PapraUpdateDocumentRequest(Name: name, Content: content))
+            Content = JsonContent.Create(new PapraUpdateDocumentTitleRequest(Name: name))
         };
         var response = await client.SendAsync(request, ct);
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync(ct);
             throw new HttpRequestException(
-                $"Papra update document failed with {(int)response.StatusCode}: {errorBody}",
-                null, response.StatusCode);
-        }
-    }
-
-    public async Task<List<(string Id, string Name)>> GetTagsAsync(string orgId, CancellationToken ct)
-    {
-        using var client = CreateClient();
-        var response = await client.GetAsync($"{BaseUrl}{string.Format(PapraConstants.TagsRoute, orgId)}", ct);
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync(ct);
-            throw new HttpRequestException(
-                $"Papra get tags failed with {(int)response.StatusCode}: {errorBody}",
-                null, response.StatusCode);
-        }
-
-        var result = await response.Content.ReadFromJsonAsync<PapraTagsResponse>(ct);
-        return [.. result!.Tags.Select(t => (t.Id, t.Name))];
-    }
-
-    public async Task AddTagToDocumentAsync(string orgId, string docId, string tagId, CancellationToken ct)
-    {
-        using var client = CreateClient();
-        var response = await client.PostAsJsonAsync(
-            $"{BaseUrl}{string.Format(PapraConstants.DocumentTagsRoute, orgId, docId)}",
-            new PapraAddTagRequest(TagId: tagId),
-            ct);
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync(ct);
-            throw new HttpRequestException(
-                $"Papra add tag failed with {(int)response.StatusCode}: {errorBody}",
+                $"Papra update document title failed with {(int)response.StatusCode}: {errorBody}",
                 null, response.StatusCode);
         }
     }
