@@ -38,7 +38,7 @@ public class TitleGenerationServiceTests
     }
 
     [Fact]
-    public async Task ProcessAsync_HappyPath_CompletesSuccessfully()
+    public async Task ProcessAsyncHappyPathCompletesSuccessfully()
     {
         var (_, status, papra, openAi, svc) = Build();
         var job = new ProcessingJob { DocumentId = "doc1", OrganizationId = "org1" };
@@ -57,7 +57,7 @@ public class TitleGenerationServiceTests
     }
 
     [Fact]
-    public async Task ProcessAsync_WhenModelReturnsNoTitle_FallsBackToUntitled()
+    public async Task ProcessAsyncWhenModelReturnsNoTitleFallsBackToUntitled()
     {
         var (_, status, papra, openAi, svc) = Build();
         var job = new ProcessingJob { DocumentId = "doc2", OrganizationId = "org1" };
@@ -65,11 +65,10 @@ public class TitleGenerationServiceTests
         papra.GetDocumentInfoAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(("file.pdf", "Content"));
         openAi.CompleteAsync(Arg.Any<string>(), Arg.Any<object?>(), Arg.Any<CancellationToken>())
-            .Returns("{\"title\":\"\"}");  // empty title
+            .Returns("{\"title\":\"\"}");
 
         await svc.ProcessAsync(job, CancellationToken.None);
 
-        // null/empty title falls back to "Untitled Document"
         await papra.Received(1).UpdateDocumentTitleAsync(
             Arg.Any<string>(), Arg.Any<string>(),
             Arg.Is<string>(t => t == "Untitled Document" || t == ""),
@@ -78,7 +77,7 @@ public class TitleGenerationServiceTests
     }
 
     [Fact]
-    public async Task ProcessAsync_WhenPapraThrows_SetsFailedStatus()
+    public async Task ProcessAsyncWhenPapraThrowsSetsFailedStatus()
     {
         var (_, status, papra, _, svc) = Build();
         var job = new ProcessingJob { DocumentId = "doc3", OrganizationId = "org1" };
@@ -94,7 +93,7 @@ public class TitleGenerationServiceTests
     }
 
     [Fact]
-    public async Task ProcessAsync_WhenCancelled_SetsFailedStatusWithCancelMessage()
+    public async Task ProcessAsyncWhenCancelledSetsFailedStatusWithCancelMessage()
     {
         var (_, status, papra, _, svc) = Build();
         var job = new ProcessingJob { DocumentId = "doc4", OrganizationId = "org1" };
@@ -111,13 +110,13 @@ public class TitleGenerationServiceTests
     }
 
     [Fact]
-    public async Task ProcessAsync_AlwaysCallsJobStartedAndJobCompleted()
+    public async Task ProcessAsyncAlwaysCallsJobStartedAndJobCompleted()
     {
         var (_, status, papra, _, svc) = Build();
         var job = new ProcessingJob { DocumentId = "doc5", OrganizationId = "org1" };
 
         papra.GetDocumentInfoAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("boom"));
+            .ThrowsAsync(new InvalidOperationException("boom"));
 
         await svc.ProcessAsync(job, CancellationToken.None);
 
@@ -126,7 +125,7 @@ public class TitleGenerationServiceTests
     }
 
     [Fact]
-    public async Task ProcessAsync_WithNoDelay_DoesNotDelayProcessing()
+    public async Task ProcessAsyncWithNoDelayDoesNotDelayProcessing()
     {
         var (_, _, papra, openAi, svc) = Build(ConfiguredSettings(delaySeconds: 0));
         var job = new ProcessingJob { DocumentId = "doc6", OrganizationId = "org1" };
@@ -140,12 +139,11 @@ public class TitleGenerationServiceTests
         await svc.ProcessAsync(job, CancellationToken.None);
         sw.Stop();
 
-        // With no delay the job should complete quickly (well under 1 second)
         Assert.True(sw.Elapsed < TimeSpan.FromSeconds(1));
     }
 
     [Fact]
-    public async Task ProcessAsync_TitlePromptReplacesOriginalTitlePlaceholder()
+    public async Task ProcessAsyncTitlePromptReplacesOriginalTitlePlaceholder()
     {
         var (_, _, papra, openAi, svc) = Build();
         var job = new ProcessingJob { DocumentId = "doc7", OrganizationId = "org1" };
@@ -157,7 +155,6 @@ public class TitleGenerationServiceTests
 
         await svc.ProcessAsync(job, CancellationToken.None);
 
-        // The prompt sent to the AI must contain the actual document name
         await openAi.Received(1).CompleteAsync(
             Arg.Is<string>(p => p!.Contains("My Invoice.pdf")),
             Arg.Any<object?>(),

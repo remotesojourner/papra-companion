@@ -82,11 +82,15 @@ jobs:
       - name: Build
         run: dotnet build ${{ env.SOLUTION }} --no-restore -c Release
 
+      - name: Install Chromium for the browser tests
+        run: pwsh Papra.Companion.Tests/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
       - name: Test
+        env:
+          PAPRA_COMPANION_BROWSER_TESTS: required
         run: >
-          dotnet test ${{ env.SOLUTION }} --no-build -c Release
-          --logger "trx;LogFileName=results.trx"
-          --results-directory ./test-results
+          dotnet test --solution ${{ env.SOLUTION }} --no-build -c Release
+          --results-directory ${{ github.workspace }}/test-results --report-xunit-trx
 
       - name: Publish test results
         uses: dorny/test-reporter@v3

@@ -3,13 +3,13 @@ using Papra.Companion.Services.Interfaces;
 namespace Papra.Companion.BackgroundServices;
 
 public partial class PipelineBackgroundService(
-    IPipelineQueue queue,
+    IPipelineJobChannel queue,
     IServiceProvider services,
     ILogger<PipelineBackgroundService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Title generation background service started");
+        LogStarted(logger);
 
         await foreach (var job in queue.ReadAllAsync(stoppingToken))
         {
@@ -29,8 +29,14 @@ public partial class PipelineBackgroundService(
             }
         }
 
-        logger.LogInformation("Title generation background service stopped");
+        LogStopped(logger);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Title generation background service started")]
+    private static partial void LogStarted(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Title generation background service stopped")]
+    private static partial void LogStopped(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled error processing job for document {DocumentId}")]
     private static partial void LogUnhandledJobError(ILogger logger, Exception ex, string documentId);

@@ -3,9 +3,6 @@ using Papra.Companion.Data;
 
 namespace Papra.Companion.Tests.Repositories;
 
-/// <summary>
-/// Simple IDbContextFactory implementation for tests, backed by EF Core In-Memory database.
-/// </summary>
 internal sealed class TestDbContextFactory(DbContextOptions<AppDbContext> options)
     : IDbContextFactory<AppDbContext>
 {

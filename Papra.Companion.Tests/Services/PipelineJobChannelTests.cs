@@ -3,12 +3,12 @@ using Papra.Companion.Services;
 
 namespace Papra.Companion.Tests.Services;
 
-public class PipelineQueueTests
+public class PipelineJobChannelTests
 {
     [Fact]
-    public async Task EnqueueAsync_ThenReadAllAsync_YieldsEnqueuedJob()
+    public async Task EnqueueAsyncThenReadAllAsyncYieldsEnqueuedJob()
     {
-        var queue = new PipelineQueue();
+        var queue = new PipelineJobChannel();
         var job = new ProcessingJob { DocumentId = "doc1", OrganizationId = "org1" };
 
         await queue.EnqueueAsync(job, TestContext.Current.CancellationToken);
@@ -21,9 +21,9 @@ public class PipelineQueueTests
     }
 
     [Fact]
-    public async Task EnqueueAsync_MultipleJobs_PreservesOrder()
+    public async Task EnqueueAsyncMultipleJobsPreservesOrder()
     {
-        var queue = new PipelineQueue();
+        var queue = new PipelineJobChannel();
         var jobs = Enumerable.Range(1, 5)
             .Select(i => new ProcessingJob { DocumentId = $"doc{i}" })
             .ToList();

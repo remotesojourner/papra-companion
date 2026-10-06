@@ -1,0 +1,17 @@
+@if (string.IsNullOrEmpty(Tooltip))
+{
+    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="@Color" Icon="@Icon">@Text</MudChip>
+}
+else
+{
+    <MudTooltip Text="@Tooltip">
+        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="@Color" Icon="@Icon">@Text</MudChip>
+    </MudTooltip>
+}
+
+@code {
+    [Parameter] public string Text { get; set; } = "";
+    [Parameter] public Color Color { get; set; } = Color.Default;
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Tooltip { get; set; }
+}

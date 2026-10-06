@@ -1,0 +1,80 @@
+@page "/settings"
+@page "/settings/{Section}"
+@using Papra.Companion.Components.Pages.Settings
+@inject ISettingsService SettingsService
+@inject IEmailAttachmentSettingsService EmailSettingsService
+@implements IDisposable
+
+<PageTitle>@WebStrings.Format(WebStrings.PageTitle, WebStrings.SettingsTitle)</PageTitle>
+
+<div class="pc-settings-page">
+    <PageHeader Title="@WebStrings.SettingsTitle" Subtitle="@WebStrings.SettingsSubtitle" />
+
+    <SettingsStatus Pipeline="@SettingsService.Current" Email="@EmailSettingsService.Current" />
+
+    <div class="pc-settings">
+        <nav class="pc-settings-nav" aria-label="@WebStrings.SettingsSections">
+            @foreach (var (key, icon, title) in _sections)
+            {
+                <a href="@($"settings/{key}")" class="@LinkClass(key)" aria-current="@(key == _active ? "page" : null)">
+                    <MudIcon Icon="@icon" Size="Size.Small" Class="pc-settings-link-icon" />
+                    <span class="pc-settings-link-label">@title</span>
+                </a>
+            }
+        </nav>
+
+        <div class="pc-settings-content">
+            @switch (_active)
+            {
+                case AiSection:
+                    <SettingsAi />
+                    break;
+                case EmailSection:
+                    <SettingsEmail />
+                    break;
+                default:
+                    <SettingsPapra />
+                    break;
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private const string PapraSection = "papra";
+    private const string AiSection = "ai";
+    private const string EmailSection = "email";
+
+    private static readonly (string Key, string Icon, string Title)[] _sections =
+    [
+        (PapraSection, Icons.Material.Rounded.Description, WebStrings.SettingsTabPapra),
+        (AiSection, Icons.Material.Rounded.Psychology, WebStrings.SettingsTabAi),
+        (EmailSection, Icons.Material.Rounded.Email, WebStrings.SettingsTabEmail)
+    ];
+
+    [Parameter] public string? Section { get; set; }
+
+    private string _active = PapraSection;
+
+    protected override void OnInitialized()
+    {
+        SettingsService.OnChanged += OnSettingsChanged;
+        EmailSettingsService.OnChanged += OnSettingsChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        var requested = Section?.ToLowerInvariant();
+        _active = _sections.Any(s => s.Key == requested) ? requested! : PapraSection;
+    }
+
+    private string LinkClass(string key) => key == _active ? "pc-settings-link pc-settings-link-active" : "pc-settings-link";
+
+    private void OnSettingsChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        SettingsService.OnChanged -= OnSettingsChanged;
+        EmailSettingsService.OnChanged -= OnSettingsChanged;
+    }
+}

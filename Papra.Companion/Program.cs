@@ -1,5 +1,5 @@
 using System.Text.Json.Nodes;
-using Flowbite.Services;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using Papra.Companion;
 using Papra.Companion.BackgroundServices;
 using Papra.Companion.Components;
@@ -27,19 +28,16 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient();
 
-// Flowbite services (TailwindMerge, FloatingService, etc.)
-builder.Services.AddFlowbite();
+builder.Services.AddMudServices();
+builder.Services.AddScoped<BrowserInteropService>();
 
-// SQLite database via EF Core
 var dbPath = Path.Combine(builder.Environment.ContentRootPath, AppPaths.DataFolder, AppPaths.DatabaseFileName);
 Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
-// Pre-create attachments folder under content root
 Directory.CreateDirectory(Path.Combine(builder.Environment.ContentRootPath, AppPaths.AttachmentsFolder));
 
-// Trust forwarded headers from the reverse proxy (Docker network)
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
@@ -53,7 +51,6 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
     .SetApplicationName("Papra.Companion");
 
-// OIDC Authentication (optional — only enabled when OIDC_ISSUER is set)
 var oidcIssuer = Environment.GetEnvironmentVariable("OIDC_ISSUER");
 var oidcEnabled = !string.IsNullOrWhiteSpace(oidcIssuer);
 
@@ -106,18 +103,16 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddCascadingAuthenticationState();
 
-// Pipeline services
 builder.Services.AddSingleton<IJobResultRepository, JobResultRepository>();
 builder.Services.AddSingleton<IPipelineSettingsRepository, PipelineSettingsRepository>();
 builder.Services.AddSingleton<ISettingsService, SettingsService>();
 builder.Services.AddSingleton<IPipelineStatusService, PipelineStatusService>();
-builder.Services.AddSingleton<IPipelineQueue, PipelineQueue>();
+builder.Services.AddSingleton<IPipelineJobChannel, PipelineJobChannel>();
 builder.Services.AddScoped<IPapraService, PapraService>();
 builder.Services.AddScoped<IOpenAiService, OpenAiService>();
 builder.Services.AddScoped<ITitleGenerationService, TitleGenerationService>();
 builder.Services.AddHostedService<PipelineBackgroundService>();
 
-// Email attachment downloader services
 builder.Services.AddSingleton<IEmailAttachmentSettingsRepository, EmailAttachmentSettingsRepository>();
 builder.Services.AddSingleton<IEmailAttachmentLogRepository, EmailAttachmentLogRepository>();
 builder.Services.AddSingleton<IEmailAttachmentSettingsService, EmailAttachmentSettingsService>();
@@ -139,28 +134,29 @@ app.UseAuthorization();
 app.UseAntiforgery();
 app.MapStaticAssets();
 
-// Auth endpoints (only wired when OIDC is enabled)
 if (oidcEnabled)
 {
     app.MapGet("/auth/login", () => Results.Challenge(
         new AuthenticationProperties { RedirectUri = "/" },
         [OpenIdConnectDefaults.AuthenticationScheme]));
 
-    app.MapGet("/auth/logout", async context =>
+    app.MapPost("/auth/logout", async (HttpContext context, IAntiforgery antiforgery) =>
     {
+        if (!await antiforgery.IsRequestValidAsync(context))
+            return Results.Problem("The sign-out request has no valid antiforgery token.", statusCode: StatusCodes.Status400BadRequest);
+
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
             new AuthenticationProperties { RedirectUri = "/" });
-    });
+        return Results.Empty;
+    }).AllowAnonymous();
 }
 
-// Minimal API endpoint for application stats
 app.MapGet("/api/stats", (IPipelineStatusService pipelineStatusService, IEmailAttachmentLogRepository emailAttachmentLogRepository) =>
 {
     var uptime = DateTimeOffset.UtcNow - appStartTime;
     var recentEmailDownloads = emailAttachmentLogRepository.GetRecent(100);
     var totalEmailDownloads = recentEmailDownloads.Count;
-    var mostRecentDownload = recentEmailDownloads.OrderByDescending(e => e.DownloadedAt).FirstOrDefault();
 
     var stats = new
     {
@@ -176,16 +172,15 @@ app.MapGet("/api/stats", (IPipelineStatusService pipelineStatusService, IEmailAt
     return Results.Json(stats);
 }).AllowAnonymous();
 
-// Webhook endpoint - Papra calls this when a document is uploaded
 app.MapPost("/webhook/document", async (HttpContext context,
     ISettingsService settingsService,
-    IPipelineQueue queue,
+    IPipelineJobChannel queue,
     ILogger<Program> logger) =>
 {
     var settings = settingsService.Current;
     if (!settings.IsConfigured)
     {
-        logger.LogWarning("Webhook received but pipeline is not configured");
+        logger.LogWebhookNotConfigured();
         return Results.Problem("Pipeline is not configured.", statusCode: 503);
     }
 
@@ -198,7 +193,7 @@ app.MapPost("/webhook/document", async (HttpContext context,
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Failed to parse webhook payload");
+        logger.LogWebhookPayloadInvalid(ex);
         return Results.BadRequest("Invalid JSON payload.");
     }
 
@@ -207,7 +202,7 @@ app.MapPost("/webhook/document", async (HttpContext context,
 
     if (string.IsNullOrWhiteSpace(orgId) || string.IsNullOrWhiteSpace(docId))
     {
-        logger.LogWarning("Webhook payload missing organizationId or documentId");
+        logger.LogWebhookPayloadIncomplete();
         return Results.BadRequest("Missing organizationId or documentId in payload.");
     }
 
@@ -224,7 +219,6 @@ app.MapPost("/webhook/document", async (HttpContext context,
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Apply any pending EF Core migrations on startup
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext();

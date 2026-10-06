@@ -1,7 +1,9 @@
 <Solution>
   <Folder Name="/Solution items/">
     <File Path="AI-DECLARATION.md" />
+    <File Path="Directory.Packages.props" />
     <File Path="GitVersion.yml" />
+    <File Path="global.json" />
     <File Path="LICENSE.txt" />
     <File Path="README.md" />
   </Folder>

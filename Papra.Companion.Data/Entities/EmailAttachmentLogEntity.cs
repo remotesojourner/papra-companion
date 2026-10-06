@@ -1,6 +1,5 @@
 namespace Papra.Companion.Data.Entities;
 
-/// <summary>One row per downloaded attachment — used for deduplication and history.</summary>
 public class EmailAttachmentLogEntity
 {
     public int Id { get; set; }

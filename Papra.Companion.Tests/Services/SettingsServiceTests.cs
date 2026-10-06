@@ -11,12 +11,12 @@ public class SettingsServiceTests
     private static IPipelineSettingsRepository EmptyRepository()
     {
         var repo = Substitute.For<IPipelineSettingsRepository>();
-        repo.Get().Returns((PipelineSettingsEntity?)null);
+        repo.Find().Returns((PipelineSettingsEntity?)null);
         return repo;
     }
 
     [Fact]
-    public void Current_WhenRepositoryEmpty_ReturnsDefaults()
+    public void CurrentWhenRepositoryEmptyReturnsDefaults()
     {
         var service = new SettingsService(EmptyRepository());
 
@@ -30,7 +30,7 @@ public class SettingsServiceTests
     }
 
     [Fact]
-    public void Current_WhenRepositoryHasEntity_MapsAllFields()
+    public void CurrentWhenRepositoryHasEntityMapsAllFields()
     {
         var entity = new PipelineSettingsEntity
         {
@@ -43,7 +43,7 @@ public class SettingsServiceTests
             ProcessingDelaySeconds = 30,
         };
         var repo = Substitute.For<IPipelineSettingsRepository>();
-        repo.Get().Returns(entity);
+        repo.Find().Returns(entity);
 
         var service = new SettingsService(repo);
         var current = service.Current;
@@ -58,11 +58,11 @@ public class SettingsServiceTests
     }
 
     [Fact]
-    public void Current_WhenRepositoryHasEmptyTitlePrompt_FallsBackToDefault()
+    public void CurrentWhenRepositoryHasEmptyTitlePromptFallsBackToDefault()
     {
         var entity = new PipelineSettingsEntity { TitlePrompt = "" };
         var repo = Substitute.For<IPipelineSettingsRepository>();
-        repo.Get().Returns(entity);
+        repo.Find().Returns(entity);
 
         var service = new SettingsService(repo);
 
@@ -70,7 +70,7 @@ public class SettingsServiceTests
     }
 
     [Fact]
-    public void Save_UpdatesCurrentImmediately()
+    public void SaveUpdatesCurrentImmediately()
     {
         var service = new SettingsService(EmptyRepository());
 
@@ -89,7 +89,7 @@ public class SettingsServiceTests
     }
 
     [Fact]
-    public void Save_RaisesOnChangedEvent()
+    public void SaveRaisesOnChangedEvent()
     {
         var service = new SettingsService(EmptyRepository());
         var raised = false;

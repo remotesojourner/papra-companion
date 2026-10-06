@@ -362,9 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Tailwind CSS standalone CLI binary (auto-downloaded at build time)
-**/tools/
-
 # Runtime data folder (SQLite database, Data Protection keys)
 **/data/
 /build_out.txt

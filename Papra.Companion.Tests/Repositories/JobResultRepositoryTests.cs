@@ -7,7 +7,7 @@ namespace Papra.Companion.Tests.Repositories;
 
 public class JobResultRepositoryTests
 {
-    private static IDbContextFactory<AppDbContext> CreateFactory(string dbName)
+    private static TestDbContextFactory CreateFactory(string dbName)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(dbName)
@@ -16,9 +16,9 @@ public class JobResultRepositoryTests
     }
 
     [Fact]
-    public async Task AddAsync_ThenGetRecent_ReturnsAddedEntity()
+    public async Task AddAsyncThenGetRecentReturnsAddedEntity()
     {
-        var factory = CreateFactory(nameof(AddAsync_ThenGetRecent_ReturnsAddedEntity));
+        var factory = CreateFactory(nameof(AddAsyncThenGetRecentReturnsAddedEntity));
         var repo = new JobResultRepository(factory);
         var entity = new JobResultEntity
         {
@@ -37,9 +37,9 @@ public class JobResultRepositoryTests
     }
 
     [Fact]
-    public async Task GetRecent_ReturnsInDescendingStartedAtOrder()
+    public async Task GetRecentReturnsInDescendingStartedAtOrder()
     {
-        var factory = CreateFactory(nameof(GetRecent_ReturnsInDescendingStartedAtOrder));
+        var factory = CreateFactory(nameof(GetRecentReturnsInDescendingStartedAtOrder));
         var repo = new JobResultRepository(factory);
         var now = DateTimeOffset.UtcNow;
 
@@ -53,9 +53,9 @@ public class JobResultRepositoryTests
     }
 
     [Fact]
-    public async Task GetRecent_RespectsCountLimit()
+    public async Task GetRecentRespectsCountLimit()
     {
-        var factory = CreateFactory(nameof(GetRecent_RespectsCountLimit));
+        var factory = CreateFactory(nameof(GetRecentRespectsCountLimit));
         var repo = new JobResultRepository(factory);
         var now = DateTimeOffset.UtcNow;
 
@@ -74,9 +74,9 @@ public class JobResultRepositoryTests
     }
 
     [Fact]
-    public void GetRecent_WhenEmpty_ReturnsEmptyList()
+    public void GetRecentWhenEmptyReturnsEmptyList()
     {
-        var factory = CreateFactory(nameof(GetRecent_WhenEmpty_ReturnsEmptyList));
+        var factory = CreateFactory(nameof(GetRecentWhenEmptyReturnsEmptyList));
         var repo = new JobResultRepository(factory);
 
         var results = repo.GetRecent(10);

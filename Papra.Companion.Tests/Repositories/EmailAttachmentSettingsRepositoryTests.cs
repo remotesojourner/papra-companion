@@ -16,18 +16,18 @@ public class EmailAttachmentSettingsRepositoryTests
     }
 
     [Fact]
-    public void Get_WhenEmpty_ReturnsNull()
+    public void GetWhenEmptyReturnsNull()
     {
         var repo = new EmailAttachmentSettingsRepository(
-            CreateFactory(nameof(Get_WhenEmpty_ReturnsNull)));
+            CreateFactory(nameof(GetWhenEmptyReturnsNull)));
 
-        Assert.Null(repo.Get());
+        Assert.Null(repo.Find());
     }
 
     [Fact]
-    public async Task UpsertAsync_WhenNoExisting_InsertsNewRow()
+    public async Task UpsertAsyncWhenNoExistingInsertsNewRow()
     {
-        var factory = CreateFactory(nameof(UpsertAsync_WhenNoExisting_InsertsNewRow));
+        var factory = CreateFactory(nameof(UpsertAsyncWhenNoExistingInsertsNewRow));
         var repo = new EmailAttachmentSettingsRepository(factory);
         var entity = new EmailAttachmentSettingsEntity
         {
@@ -42,7 +42,7 @@ public class EmailAttachmentSettingsRepositoryTests
         };
 
         await repo.UpsertAsync(entity);
-        var result = repo.Get();
+        var result = repo.Find();
 
         Assert.NotNull(result);
         Assert.Equal("imap.example.com", result.Host);
@@ -51,9 +51,9 @@ public class EmailAttachmentSettingsRepositoryTests
     }
 
     [Fact]
-    public async Task UpsertAsync_WhenExisting_UpdatesAllFields()
+    public async Task UpsertAsyncWhenExistingUpdatesAllFields()
     {
-        var factory = CreateFactory(nameof(UpsertAsync_WhenExisting_UpdatesAllFields));
+        var factory = CreateFactory(nameof(UpsertAsyncWhenExistingUpdatesAllFields));
         var repo = new EmailAttachmentSettingsRepository(factory);
 
         await repo.UpsertAsync(new EmailAttachmentSettingsEntity
@@ -82,7 +82,7 @@ public class EmailAttachmentSettingsRepositoryTests
             PollIntervalSeconds = 60,
         });
 
-        var result = repo.Get()!;
+        var result = repo.Find()!;
         Assert.Equal("new.imap.com", result.Host);
         Assert.Equal(143, result.Port);
         Assert.Equal("new@example.com", result.Username);
@@ -99,9 +99,9 @@ public class EmailAttachmentSettingsRepositoryTests
     }
 
     [Fact]
-    public async Task UpsertAsync_CalledMultipleTimes_OnlyOneRowExists()
+    public async Task UpsertAsyncCalledMultipleTimesOnlyOneRowExists()
     {
-        var factory = CreateFactory(nameof(UpsertAsync_CalledMultipleTimes_OnlyOneRowExists));
+        var factory = CreateFactory(nameof(UpsertAsyncCalledMultipleTimesOnlyOneRowExists));
         var repo = new EmailAttachmentSettingsRepository(factory);
 
         await repo.UpsertAsync(new EmailAttachmentSettingsEntity { Host = "first" });

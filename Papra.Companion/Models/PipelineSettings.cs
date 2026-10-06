@@ -2,29 +2,27 @@ namespace Papra.Companion.Models;
 
 public class PipelineSettings
 {
-    // ── Papra connection ──────────────────────────────────────────────────────
     public string PapraBaseUrl { get; set; } = string.Empty;
     public string PapraApiToken { get; set; } = string.Empty;
 
-    // ── AI services ───────────────────────────────────────────────────────────
     public string OpenAiBaseUrl { get; set; } = string.Empty;
     public string OpenAiApiKey { get; set; } = string.Empty;
     public string OpenAiModel { get; set; } = "gpt-4o-mini";
 
-    // ── Prompts ───────────────────────────────────────────────────────────────
     public string TitlePrompt { get; set; } = DefaultTitlePrompt;
 
-    // ── Pipeline behaviour ────────────────────────────────────────────────────
-    /// <summary>Seconds to wait after receiving a webhook before processing the document.</summary>
-    public int ProcessingDelaySeconds { get; set; } = 0;
+    public int ProcessingDelaySeconds { get; set; }
 
-    // ── Computed ──────────────────────────────────────────────────────────────
-    public bool IsConfigured =>
+    public bool IsPapraConfigured =>
         !string.IsNullOrWhiteSpace(PapraBaseUrl) &&
-        !string.IsNullOrWhiteSpace(PapraApiToken) &&
-        !string.IsNullOrWhiteSpace(OpenAiApiKey);
+        !string.IsNullOrWhiteSpace(PapraApiToken);
 
-    // ── Default prompts ───────────────────────────────────────────────────────
+    public bool IsAiConfigured => !string.IsNullOrWhiteSpace(OpenAiApiKey);
+
+    public bool IsConfigured => IsPapraConfigured && IsAiConfigured;
+
+    public PipelineSettings Clone() => (PipelineSettings)MemberwiseClone();
+
     public const string DefaultTitlePrompt =
         """
         I will provide you with the name and extracted text content of a document.

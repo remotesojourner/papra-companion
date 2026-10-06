@@ -1,0 +1,90 @@
+@inject ISettingsService SettingsService
+@inject IOpenAiService OpenAiService
+@inject ISnackbar Snackbar
+
+<SurfaceCard Icon="@Icons.Material.Rounded.Psychology" Title="@WebStrings.SettingsTabAi" FullHeight="false"
+             Description="@WebStrings.SettingsAiDescription">
+    <ChildContent>
+        <SettingsRow Label="@WebStrings.RowApi" Description="@WebStrings.RowApiDescription">
+            <div class="pc-fields">
+                <MudTextField T="string" @bind-Value="_baseUrl" Label="@WebStrings.AiBaseUrl" Placeholder="https://api.openai.com/v1/"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-field-full" />
+                <SecretField @bind-Value="_apiKey" Label="@WebStrings.AiApiKey" Saved="@(!string.IsNullOrWhiteSpace(Saved.OpenAiApiKey))"
+                             SavedPlaceholder="@WebStrings.AiApiKeySaved" Placeholder="sk-..." />
+                <MudTextField T="string" @bind-Value="_model" Label="@WebStrings.AiModel" Placeholder="@WebStrings.AiModelPlaceholder"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
+            </div>
+        </SettingsRow>
+        <SettingsRow Label="@WebStrings.RowPrompt" Description="@WebStrings.RowPromptDescription">
+            <LabelContent>
+                <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Primary" StartIcon="@Icons.Material.Rounded.RestartAlt"
+                           Class="pc-row-action" OnClick="ResetTitlePrompt">
+                    @WebStrings.AiPromptReset
+                </MudButton>
+            </LabelContent>
+            <ChildContent>
+                <MudTextField T="string" @bind-Value="_titlePrompt" Label="@WebStrings.AiPrompt" Lines="6" Sizing="InputSizing.Auto" MaxLines="14"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-mono" />
+                <PlaceholderList Placeholders="@_titlePlaceholders" />
+            </ChildContent>
+        </SettingsRow>
+        <SettingsRow Label="@WebStrings.RowDelay" Description="@WebStrings.RowDelayDescription">
+            <MudNumericField T="int" @bind-Value="_processingDelaySeconds" Label="@WebStrings.AiDelay" Min="0"
+                             Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-field-small" />
+        </SettingsRow>
+    </ChildContent>
+    <Footer>
+        <ConnectionTest Test="TestAsync" />
+        <CardSave Dirty="Dirty" OnSave="Save" />
+    </Footer>
+</SurfaceCard>
+
+@code {
+    private static readonly (string Token, string Description)[] _titlePlaceholders =
+    [
+        ("{{original_title}}", WebStrings.AiPlaceholderOriginalTitle),
+        ("{{content}}", WebStrings.AiPlaceholderContent)
+    ];
+
+    private string _baseUrl = "";
+    private string _apiKey = "";
+    private string _model = "";
+    private string _titlePrompt = "";
+    private int _processingDelaySeconds;
+
+    private PipelineSettings Saved => SettingsService.Current;
+
+    private string KeyToUse => string.IsNullOrWhiteSpace(_apiKey) ? Saved.OpenAiApiKey : _apiKey.Trim();
+
+    private bool Dirty =>
+        _baseUrl.Trim() != Saved.OpenAiBaseUrl || _model.Trim() != Saved.OpenAiModel || !string.IsNullOrWhiteSpace(_apiKey)
+        || _titlePrompt != Saved.TitlePrompt || _processingDelaySeconds != Saved.ProcessingDelaySeconds;
+
+    protected override void OnInitialized() => Load(Saved);
+
+    private void Load(PipelineSettings settings)
+    {
+        _baseUrl = settings.OpenAiBaseUrl;
+        _apiKey = "";
+        _model = settings.OpenAiModel;
+        _titlePrompt = settings.TitlePrompt;
+        _processingDelaySeconds = settings.ProcessingDelaySeconds;
+    }
+
+    private Task<string> TestAsync() => OpenAiService.TestConnectionAsync(_baseUrl.Trim(), KeyToUse, _model.Trim(), CancellationToken.None);
+
+    private void ResetTitlePrompt() => _titlePrompt = PipelineSettings.DefaultTitlePrompt;
+
+    private void Save()
+    {
+        var settings = Saved.Clone();
+        settings.OpenAiBaseUrl = _baseUrl.Trim();
+        settings.OpenAiApiKey = KeyToUse;
+        settings.OpenAiModel = _model.Trim();
+        settings.TitlePrompt = _titlePrompt;
+        settings.ProcessingDelaySeconds = _processingDelaySeconds;
+        SettingsService.Save(settings);
+        Load(settings);
+        Snackbar.Add(WebStrings.SettingsSaved, Severity.Success);
+    }
+}

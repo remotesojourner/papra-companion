@@ -10,13 +10,13 @@ using Papra.Companion.Data.Repositories.Interfaces;
 
 namespace Papra.Companion.Tests;
 
-public class StatsEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public class StatsEndpointTests : IClassFixture<TestAppFactory>
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly IPipelineStatusService _pipelineStatusServiceMock;
     private readonly IEmailAttachmentLogRepository _emailAttachmentLogRepositoryMock;
 
-    public StatsEndpointTests(WebApplicationFactory<Program> factory)
+    public StatsEndpointTests(TestAppFactory factory)
     {
         _pipelineStatusServiceMock = Substitute.For<IPipelineStatusService>();
         _emailAttachmentLogRepositoryMock = Substitute.For<IEmailAttachmentLogRepository>();
@@ -35,9 +35,8 @@ public class StatsEndpointTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task GetStats_ReturnsExpectedData()
+    public async Task GetStatsReturnsExpectedData()
     {
-        // Arrange
         var client = _factory.CreateClient();
 
         _pipelineStatusServiceMock.RecentJobs.Returns(
@@ -53,10 +52,8 @@ public class StatsEndpointTests : IClassFixture<WebApplicationFactory<Program>>
             new() { Succeeded = false, DownloadedAt = DateTimeOffset.UtcNow.AddMinutes(-5) }
         ]);
 
-        // Act
         var response = await client.GetAsync("/api/stats", TestContext.Current.CancellationToken);
 
-        // Assert
         response.EnsureSuccessStatusCode();
         var stats = await response.Content.ReadFromJsonAsync<JsonNode>(
             TestContext.Current.CancellationToken);

@@ -21,7 +21,7 @@ public class EmailAttachmentSettingsService : IEmailAttachmentSettingsService
     public EmailAttachmentSettingsService(IEmailAttachmentSettingsRepository repository)
     {
         _repository = repository;
-        _current = ToModel(_repository.Get()) ?? new EmailAttachmentSettings();
+        _current = ToModel(_repository.Find()) ?? new EmailAttachmentSettings();
     }
 
     public void Save(EmailAttachmentSettings settings)

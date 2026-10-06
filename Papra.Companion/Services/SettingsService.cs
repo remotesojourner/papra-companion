@@ -21,7 +21,7 @@ public class SettingsService : ISettingsService
     public SettingsService(IPipelineSettingsRepository repository)
     {
         _repository = repository;
-        _current = ToModel(_repository.Get()) ?? new PipelineSettings();
+        _current = ToModel(_repository.Find()) ?? new PipelineSettings();
     }
 
     public void Save(PipelineSettings settings)

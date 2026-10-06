@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>Papra Companion</value>
+  </data>
+  <data name="HtmlLanguage" xml:space="preserve">
+    <value>en</value>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>{0} – Papra Companion</value>
+  </data>
+  <data name="TryAgain" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="NoValue" xml:space="preserve">
+    <value>—</value>
+  </data>
+  <data name="NotConfigured" xml:space="preserve">
+    <value>Not configured.</value>
+  </data>
+  <data name="TestConnection" xml:space="preserve">
+    <value>Test Connection</value>
+  </data>
+  <data name="TestConnectionFailed" xml:space="preserve">
+    <value>Failed: {0}</value>
+  </data>
+  <data name="SecretSavedPlaceholder" xml:space="preserve">
+    <value>Saved — type to replace</value>
+  </data>
+  <data name="SecretShow" xml:space="preserve">
+    <value>Show {0}</value>
+  </data>
+  <data name="SecretHide" xml:space="preserve">
+    <value>Hide {0}</value>
+  </data>
+  <data name="StateViewNothingToShow" xml:space="preserve">
+    <value>Nothing to show yet.</value>
+  </data>
+  <data name="PlaceholdersTitle" xml:space="preserve">
+    <value>Placeholders:</value>
+  </data>
+  <data name="StatusQueued" xml:space="preserve">
+    <value>Queued</value>
+  </data>
+  <data name="StatusProcessing" xml:space="preserve">
+    <value>Processing</value>
+  </data>
+  <data name="StatusSucceeded" xml:space="preserve">
+    <value>Succeeded</value>
+  </data>
+  <data name="StatusFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="StatusDownloaded" xml:space="preserve">
+    <value>Downloaded</value>
+  </data>
+  <data name="ColumnStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="LayoutToggleNavigation" xml:space="preserve">
+    <value>Toggle navigation</value>
+  </data>
+  <data name="LayoutToggleTheme" xml:space="preserve">
+    <value>Toggle dark mode</value>
+  </data>
+  <data name="LayoutSignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="LayoutPageErrorTitle" xml:space="preserve">
+    <value>This page ran into a problem</value>
+  </data>
+  <data name="LayoutPageErrorDescription" xml:space="preserve">
+    <value>Something went wrong while showing this page. The details are in the server log.</value>
+  </data>
+  <data name="LayoutUnhandledError" xml:space="preserve">
+    <value>An unhandled error has occurred.</value>
+  </data>
+  <data name="LayoutReload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="LayoutDismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="NavTitleGeneration" xml:space="preserve">
+    <value>Title Generation</value>
+  </data>
+  <data name="NavEmailAttachments" xml:space="preserve">
+    <value>Email Attachments</value>
+  </data>
+  <data name="NavSettings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ReconnectRejoining" xml:space="preserve">
+    <value>Rejoining the server...</value>
+  </data>
+  <data name="ReconnectRetryingBefore" xml:space="preserve">
+    <value>Rejoin failed... trying again in</value>
+  </data>
+  <data name="ReconnectRetryingAfter" xml:space="preserve">
+    <value>seconds.</value>
+  </data>
+  <data name="ReconnectFailed" xml:space="preserve">
+    <value>Failed to rejoin.</value>
+  </data>
+  <data name="ReconnectRetryOrReload" xml:space="preserve">
+    <value>Please retry or reload the page.</value>
+  </data>
+  <data name="ReconnectRetry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="ReconnectPaused" xml:space="preserve">
+    <value>The session has been paused by the server.</value>
+  </data>
+  <data name="ReconnectResumeFailed" xml:space="preserve">
+    <value>Failed to resume the session.</value>
+  </data>
+  <data name="ReconnectResume" xml:space="preserve">
+    <value>Resume</value>
+  </data>
+  <data name="PipelineTitle" xml:space="preserve">
+    <value>Title Generation</value>
+  </data>
+  <data name="PipelineHeading" xml:space="preserve">
+    <value>Title Generation History</value>
+  </data>
+  <data name="PipelineSubtitle" xml:space="preserve">
+    <value>A log of every document processed by title generation.</value>
+  </data>
+  <data name="PipelineNotConfigured" xml:space="preserve">
+    <value>Configure your Papra connection and AI credentials to enable the pipeline.</value>
+  </data>
+  <data name="PipelineOpenSettings" xml:space="preserve">
+    <value>Open Papra settings</value>
+  </data>
+  <data name="PipelineCurrentJob" xml:space="preserve">
+    <value>Current job</value>
+  </data>
+  <data name="PipelineIdle" xml:space="preserve">
+    <value>Idle</value>
+  </data>
+  <data name="PipelineTotal" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="PipelineTotalLabel" xml:space="preserve">
+    <value>Recent documents</value>
+  </data>
+  <data name="PipelineSucceededLabel" xml:space="preserve">
+    <value>Titles updated</value>
+  </data>
+  <data name="PipelineFailedLabel" xml:space="preserve">
+    <value>Titles not updated</value>
+  </data>
+  <data name="PipelineEmpty" xml:space="preserve">
+    <value>No documents processed yet. Upload a document in Papra to get started.</value>
+  </data>
+  <data name="PipelineRecentActivity" xml:space="preserve">
+    <value>Recent Activity</value>
+  </data>
+  <data name="PipelineDocumentId" xml:space="preserve">
+    <value>Document ID</value>
+  </data>
+  <data name="PipelineExtractedTitle" xml:space="preserve">
+    <value>Extracted Title</value>
+  </data>
+  <data name="PipelineDuration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="PipelineTime" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="EmailTitle" xml:space="preserve">
+    <value>Email Attachments</value>
+  </data>
+  <data name="EmailHeading" xml:space="preserve">
+    <value>Email Attachment Downloader</value>
+  </data>
+  <data name="EmailSubtitle" xml:space="preserve">
+    <value>History of attachments downloaded from your IMAP mailbox.</value>
+  </data>
+  <data name="EmailNotConfigured" xml:space="preserve">
+    <value>Configure your IMAP credentials to enable the email attachment downloader.</value>
+  </data>
+  <data name="EmailDisabledTitle" xml:space="preserve">
+    <value>Disabled.</value>
+  </data>
+  <data name="EmailDisabled" xml:space="preserve">
+    <value>The email attachment downloader is configured but currently disabled.</value>
+  </data>
+  <data name="EmailOpenSettings" xml:space="preserve">
+    <value>Open Email settings</value>
+  </data>
+  <data name="EmailTotal" xml:space="preserve">
+    <value>Total downloaded</value>
+  </data>
+  <data name="EmailTotalLabel" xml:space="preserve">
+    <value>Recent attachments</value>
+  </data>
+  <data name="EmailSucceededLabel" xml:space="preserve">
+    <value>Saved to the attachments folder</value>
+  </data>
+  <data name="EmailFailedLabel" xml:space="preserve">
+    <value>Not saved</value>
+  </data>
+  <data name="EmailEmpty" xml:space="preserve">
+    <value>No attachments downloaded yet.</value>
+  </data>
+  <data name="EmailRecentDownloads" xml:space="preserve">
+    <value>Recent Downloads</value>
+  </data>
+  <data name="EmailFilename" xml:space="preserve">
+    <value>Filename</value>
+  </data>
+  <data name="EmailMessage" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="EmailDownloaded" xml:space="preserve">
+    <value>Downloaded</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SettingsSubtitle" xml:space="preserve">
+    <value>Configure your Papra connection, AI services, and email attachment downloader.</value>
+  </data>
+  <data name="SettingsTabPapra" xml:space="preserve">
+    <value>Papra</value>
+  </data>
+  <data name="SettingsTabAi" xml:space="preserve">
+    <value>AI Services</value>
+  </data>
+  <data name="SettingsTabEmail" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="PapraBaseUrl" xml:space="preserve">
+    <value>Base URL</value>
+  </data>
+  <data name="PapraApiToken" xml:space="preserve">
+    <value>API Token</value>
+  </data>
+  <data name="PapraApiTokenSaved" xml:space="preserve">
+    <value>Saved — type to replace</value>
+  </data>
+  <data name="PapraApiTokenPlaceholder" xml:space="preserve">
+    <value>Bearer token from Papra settings</value>
+  </data>
+  <data name="WebhookTitle" xml:space="preserve">
+    <value>Webhook</value>
+  </data>
+  <data name="WebhookDescription" xml:space="preserve">
+    <value>Add it in Papra under Settings → Webhooks.</value>
+  </data>
+  <data name="WebhookUrl" xml:space="preserve">
+    <value>Webhook URL</value>
+  </data>
+  <data name="WebhookCopy" xml:space="preserve">
+    <value>Copy webhook URL</value>
+  </data>
+  <data name="WebhookCopied" xml:space="preserve">
+    <value>Webhook URL copied</value>
+  </data>
+  <data name="WebhookCopyFailed" xml:space="preserve">
+    <value>Couldn't copy the URL. Select it and copy it yourself.</value>
+  </data>
+  <data name="AiBaseUrl" xml:space="preserve">
+    <value>Base URL (optional)</value>
+  </data>
+  <data name="AiApiKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="AiApiKeySaved" xml:space="preserve">
+    <value>Saved — type to replace</value>
+  </data>
+  <data name="AiModel" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="AiModelPlaceholder" xml:space="preserve">
+    <value>e.g. gpt-4o-mini</value>
+  </data>
+  <data name="AiPromptReset" xml:space="preserve">
+    <value>Reset to default</value>
+  </data>
+  <data name="AiPrompt" xml:space="preserve">
+    <value>Prompt</value>
+  </data>
+  <data name="AiPlaceholderOriginalTitle" xml:space="preserve">
+    <value>The raw filename or title as stored in Papra before processing.</value>
+  </data>
+  <data name="AiPlaceholderContent" xml:space="preserve">
+    <value>The extracted content of the document from Papra.</value>
+  </data>
+  <data name="AiDelay" xml:space="preserve">
+    <value>Seconds before processing</value>
+  </data>
+  <data name="ImapEnabled" xml:space="preserve">
+    <value>Download automatically</value>
+  </data>
+  <data name="ImapHost" xml:space="preserve">
+    <value>IMAP host</value>
+  </data>
+  <data name="ImapPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ImapUsername" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="ImapPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="ImapPasswordSaved" xml:space="preserve">
+    <value>Saved — type to replace</value>
+  </data>
+  <data name="ImapSsl" xml:space="preserve">
+    <value>SSL / TLS</value>
+  </data>
+  <data name="ImapStartTls" xml:space="preserve">
+    <value>STARTTLS</value>
+  </data>
+  <data name="FilterFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="FilterSubject" xml:space="preserve">
+    <value>Subject filter (regex)</value>
+  </data>
+  <data name="FilterSubjectPlaceholder" xml:space="preserve">
+    <value>e.g. Invoice|Receipt</value>
+  </data>
+  <data name="FilterIgnoreCase" xml:space="preserve">
+    <value>Ignore case</value>
+  </data>
+  <data name="FilterMatchAnywhere" xml:space="preserve">
+    <value>Match anywhere in subject (not just start)</value>
+  </data>
+  <data name="SchedulePollInterval" xml:space="preserve">
+    <value>Check every (seconds)</value>
+  </data>
+  <data name="ScheduleFilenameTemplate" xml:space="preserve">
+    <value>File name template</value>
+  </data>
+  <data name="PlaceholderMessageId" xml:space="preserve">
+    <value>Unique identifier of the email message.</value>
+  </data>
+  <data name="PlaceholderAttachmentName" xml:space="preserve">
+    <value>Original filename of the attachment.</value>
+  </data>
+  <data name="PlaceholderSubject" xml:space="preserve">
+    <value>Email subject line.</value>
+  </data>
+  <data name="PlaceholderFromEmail" xml:space="preserve">
+    <value>Sender's email address.</value>
+  </data>
+  <data name="PlaceholderDate" xml:space="preserve">
+    <value>Date the email was sent (yyyy-MM-dd).</value>
+  </data>
+  <data name="AfterDelete" xml:space="preserve">
+    <value>Delete emails after downloading</value>
+  </data>
+  <data name="AfterCopyFolder" xml:space="preserve">
+    <value>Copy to folder first</value>
+  </data>
+  <data name="AfterCopyFolderPlaceholder" xml:space="preserve">
+    <value>Archived (optional)</value>
+  </data>
+  <data name="EmailCopyFolderFailed" xml:space="preserve">
+    <value>Saved, but the copy folder couldn't be checked: {0}</value>
+  </data>
+  <data name="SettingsSections" xml:space="preserve">
+    <value>Settings sections</value>
+  </data>
+  <data name="SettingsPapraDescription" xml:space="preserve">
+    <value>Where Papra Companion reads documents from and writes their new titles to.</value>
+  </data>
+  <data name="SettingsAiDescription" xml:space="preserve">
+    <value>The OpenAI-compatible model that writes document titles.</value>
+  </data>
+  <data name="SettingsEmailDescription" xml:space="preserve">
+    <value>Saves attachments from an IMAP mailbox to the attachments folder.</value>
+  </data>
+  <data name="StateOff" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="UnsavedChanges" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="SettingsSaved" xml:space="preserve">
+    <value>Settings saved</value>
+  </data>
+  <data name="EmailEnableNeedsConnection" xml:space="preserve">
+    <value>Save a server connection to turn on automatic downloads.</value>
+  </data>
+  <data name="EmailDownloaderOn" xml:space="preserve">
+    <value>Attachment downloader turned on</value>
+  </data>
+  <data name="EmailDownloaderOff" xml:space="preserve">
+    <value>Attachment downloader turned off</value>
+  </data>
+  <data name="SettingsStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="FeatureTitleGeneration" xml:space="preserve">
+    <value>Title generation</value>
+  </data>
+  <data name="FeatureEmailAttachments" xml:space="preserve">
+    <value>Email attachments</value>
+  </data>
+  <data name="StateOn" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="StateNeedsSetup" xml:space="preserve">
+    <value>Needs setup</value>
+  </data>
+  <data name="TitleGenerationOn" xml:space="preserve">
+    <value>Every new document in Papra gets an AI-written title.</value>
+  </data>
+  <data name="TitleGenerationNeedsBoth" xml:space="preserve">
+    <value>Needs a Papra connection and an AI API key.</value>
+  </data>
+  <data name="TitleGenerationNeedsPapra" xml:space="preserve">
+    <value>Needs a Papra connection.</value>
+  </data>
+  <data name="TitleGenerationNeedsAi" xml:space="preserve">
+    <value>Needs an AI API key.</value>
+  </data>
+  <data name="EmailAttachmentsOn" xml:space="preserve">
+    <value>Downloading new attachments from {0}.</value>
+  </data>
+  <data name="EmailAttachmentsOff" xml:space="preserve">
+    <value>Set up, but not downloading attachments.</value>
+  </data>
+  <data name="EmailAttachmentsNeedsSetup" xml:space="preserve">
+    <value>Needs an IMAP connection.</value>
+  </data>
+  <data name="StatusSetUpPapra" xml:space="preserve">
+    <value>Set up Papra</value>
+  </data>
+  <data name="StatusSetUpAi" xml:space="preserve">
+    <value>Add an API key</value>
+  </data>
+  <data name="StatusTurnOn" xml:space="preserve">
+    <value>Turn it on</value>
+  </data>
+  <data name="StatusSetUpEmail" xml:space="preserve">
+    <value>Set up email</value>
+  </data>
+  <data name="RowConnection" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="RowApi" xml:space="preserve">
+    <value>API</value>
+  </data>
+  <data name="RowApiDescription" xml:space="preserve">
+    <value>Leave the base URL blank to use OpenAI.</value>
+  </data>
+  <data name="RowPrompt" xml:space="preserve">
+    <value>Title prompt</value>
+  </data>
+  <data name="RowPromptDescription" xml:space="preserve">
+    <value>Sent to the model with each new document.</value>
+  </data>
+  <data name="RowDelay" xml:space="preserve">
+    <value>Delay</value>
+  </data>
+  <data name="RowDelayDescription" xml:space="preserve">
+    <value>Gives Papra time to finish indexing a new document.</value>
+  </data>
+  <data name="RowServer" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="RowFilter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="RowFilterDescription" xml:space="preserve">
+    <value>Leave blank to read every email in every folder.</value>
+  </data>
+  <data name="RowSaving" xml:space="preserve">
+    <value>Saving</value>
+  </data>
+  <data name="RowSavingDescription" xml:space="preserve">
+    <value>How often to check, and where each attachment is saved.</value>
+  </data>
+  <data name="RowAfterwards" xml:space="preserve">
+    <value>Afterwards</value>
+  </data>
+  <data name="NotFoundPageTitle" xml:space="preserve">
+    <value>Not Found</value>
+  </data>
+  <data name="NotFoundTitle" xml:space="preserve">
+    <value>Page not found</value>
+  </data>
+  <data name="NotFoundDescription" xml:space="preserve">
+    <value>Sorry, the content you are looking for does not exist.</value>
+  </data>
+  <data name="NotFoundHome" xml:space="preserve">
+    <value>Back to Title Generation</value>
+  </data>
+  <data name="ErrorPageTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Something went wrong</value>
+  </data>
+  <data name="ErrorSubtitle" xml:space="preserve">
+    <value>An error occurred while processing your request.</value>
+  </data>
+  <data name="ErrorDetails" xml:space="preserve">
+    <value>The details are in the server log.</value>
+  </data>
+  <data name="ErrorRequestId" xml:space="preserve">
+    <value>Request ID:</value>
+  </data>
+</root>

@@ -8,7 +8,7 @@ public class PipelineSettingsRepository(IDbContextFactory<AppDbContext> dbFactor
 {
     private const int SettingsId = 1;
 
-    public PipelineSettingsEntity? Get()
+    public PipelineSettingsEntity? Find()
     {
         using var db = dbFactory.CreateDbContext();
         return db.PipelineSettings.AsNoTracking().FirstOrDefault(x => x.Id == SettingsId);

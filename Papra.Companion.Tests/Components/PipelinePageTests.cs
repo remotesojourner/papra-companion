@@ -29,9 +29,9 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_WhenNotConfigured_ShowsWarningAlert()
+    public void PipelineWhenNotConfiguredShowsWarningAlert()
     {
-        _settingsSvc.Current.Returns(new PipelineSettings()); // empty — not configured
+        _settingsSvc.Current.Returns(new PipelineSettings());
 
         var cut = Render<Pipeline>();
 
@@ -39,7 +39,7 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_WhenConfigured_DoesNotShowWarning()
+    public void PipelineWhenConfiguredDoesNotShowWarning()
     {
         var cut = Render<Pipeline>();
 
@@ -47,7 +47,7 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_WhenIdle_ShowsIdleState()
+    public void PipelineWhenIdleShowsIdleState()
     {
         var cut = Render<Pipeline>();
 
@@ -55,7 +55,7 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_WhenJobProcessing_ShowsProcessingState()
+    public void PipelineWhenJobProcessingShowsProcessingState()
     {
         _statusSvc.CurrentJob.Returns(new PipelineJobResult
         {
@@ -70,7 +70,7 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_WithRecentJobs_ShowsJobTable()
+    public void PipelineWithRecentJobsShowsJobTable()
     {
         _statusSvc.RecentJobs.Returns(
         [
@@ -92,7 +92,7 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_WithFailedJob_ShowsFailedBadge()
+    public void PipelineWithFailedJobShowsFailedBadge()
     {
         _statusSvc.RecentJobs.Returns(
         [
@@ -111,7 +111,7 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_WithNoJobs_ShowsEmptyState()
+    public void PipelineWithNoJobsShowsEmptyState()
     {
         _statusSvc.RecentJobs.Returns([]);
 
@@ -121,7 +121,7 @@ public class PipelinePageTests : ComponentTestBase
     }
 
     [Fact]
-    public void Pipeline_ShowsCorrectStats()
+    public void PipelineShowsCorrectStats()
     {
         _statusSvc.RecentJobs.Returns(
         [
@@ -133,19 +133,17 @@ public class PipelinePageTests : ComponentTestBase
         var cut = Render<Pipeline>();
         var markup = cut.Markup;
 
-        // Stats cards: Total=3, Success=2, Failed=1
         Assert.Contains(">3<", markup);
         Assert.Contains(">2<", markup);
         Assert.Contains(">1<", markup);
     }
 
     [Fact]
-    public void Pipeline_DisposesEventHandlerOnDispose()
+    public void PipelineDisposesEventHandlerOnDispose()
     {
         var cut = Render<Pipeline>();
         cut.Instance.Dispose();
 
-        // Verify the OnChanged event is unsubscribed — invoking it must not throw
         _statusSvc.OnChanged += Raise.Event<Action>();
     }
 }

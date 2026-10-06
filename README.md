@@ -173,14 +173,28 @@ cd Papra.Companion
 dotnet run
 ```
 
-### Tailwind CSS
+### UI
 
-Tailwind v4 is configured as a standalone CLI pipeline:
+The UI is built with [MudBlazor](https://mudblazor.com/) and the vendored [Modernity CSS patch](https://github.com/russkyc/modernity-css-experiment) (`wwwroot/css/modernity.patch.css`). The theme is in `Utils/AppTheme.cs`, and app-specific styles go in `wwwroot/css/papra-companion.css` with `pc-` classes. Fonts are vendored in `wwwroot/fonts`, so pages make no requests to other sites.
 
-- The CLI binary is downloaded by an MSBuild target (`DownloadTailwind`) on first build
-- The `Tailwind` MSBuild target runs the CLI to compile `wwwroot/css/app.css` → `wwwroot/css/app.min.css`
-- The source `app.css` is excluded from the published output (only the compiled `app.min.css` is deployed)
-- The pinned version is set via `<TailwindVersion>` in the `.csproj`
+Conventions:
+
+- UI text goes in `Resources/WebStrings.resx` and is read through the generated `WebStrings` class; fill placeholders with `WebStrings.Format`.
+- No code comments (the vendored Modernity patch and EF's generated migration designer and snapshot files are exempt).
+- Package versions live in `Directory.Packages.props`.
+- Warnings are errors and the recommended .NET analyzers run (`Directory.Build.props`, `.editorconfig`): log through `[LoggerMessage]` methods, name private fields `_camelCase`, and name tests as PascalCase sentences.
+- A new migration: run `dotnet format style Papra.Companion.Data/Papra.Companion.Data.csproj --diagnostics IDE0005 IDE0161 --severity warn`, then delete its `#nullable disable` and `/// <inheritdoc />` lines.
+
+### Tests
+
+```bash
+dotnet test
+dotnet test --project Papra.Companion.Tests --filter-not-trait "Category=Browser"
+dotnet test --project Papra.Companion.Tests --filter-trait "Category=Browser"
+pwsh Papra.Companion.Tests/bin/Debug/net10.0/playwright.ps1 install chromium
+```
+
+The browser tests run the app on a free port with sample data and drive it with Playwright. They are skipped when Chromium isn't installed, unless `PAPRA_COMPANION_BROWSER_TESTS=required` is set, as it is in CI. `PageLayoutTests` saves every page in both themes at 1280px and 390px to `Papra.Companion.Tests/bin/Debug/net10.0/TestResults/browser`; look at them after UI changes.
 
 ### Database migrations
 
@@ -197,8 +211,7 @@ dotnet ef migrations add <MigrationName> --project Papra.Companion.Data --startu
 | Component | Technology |
 |---|---|
 | Framework | ASP.NET Core 10, Blazor Server (Interactive Server render mode) |
-| UI components | [Flowbite Blazor](https://flowbite-blazor.com/) |
-| CSS | Tailwind CSS v4 (standalone CLI) |
+| UI components | [MudBlazor](https://mudblazor.com/) with the [Modernity CSS patch](https://github.com/russkyc/modernity-css-experiment) |
 | Database | SQLite via Entity Framework Core |
 | HTTP clients | `System.Net.Http.Json` with typed DTOs |
 | IMAP | [MailKit](https://github.com/jstedfast/MailKit) |

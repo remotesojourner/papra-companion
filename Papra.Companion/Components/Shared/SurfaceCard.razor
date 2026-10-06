@@ -1,0 +1,55 @@
+<MudCard Elevation="0" Class="@CardClass()">
+    <div class="pa-5">
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <div class="d-flex flex-wrap align-center gap-2 @(string.IsNullOrEmpty(Description) ? "mb-3" : "mb-1")">
+                @if (!string.IsNullOrEmpty(Icon))
+                {
+                    <MudIcon Icon="@Icon" Class="pc-muted" Size="Size.Small" />
+                }
+                <MudText Typo="Typo.subtitle1" HtmlTag="@TitleTag" Class="font-weight-bold flex-grow-1">@Title</MudText>
+                @HeaderActions
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Description))
+        {
+            <MudText Typo="Typo.body2" Class="pc-muted mb-4 d-block">@Description</MudText>
+        }
+
+        @ChildContent
+
+        @if (Actions != null)
+        {
+            <div class="d-flex flex-wrap align-center gap-2 mt-4">
+                @Actions
+            </div>
+        }
+    </div>
+    @if (Footer != null)
+    {
+        <div class="pc-card-footer">
+            @Footer
+        </div>
+    }
+</MudCard>
+
+@code {
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string TitleTag { get; set; } = "h2";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public bool FullHeight { get; set; } = true;
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? HeaderActions { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+
+    private string CardClass()
+    {
+        var parts = new List<string> { "pc-card" };
+        if (FullHeight) parts.Add("pc-fill");
+        if (!string.IsNullOrEmpty(Class)) parts.Add(Class);
+        return string.Join(" ", parts);
+    }
+}

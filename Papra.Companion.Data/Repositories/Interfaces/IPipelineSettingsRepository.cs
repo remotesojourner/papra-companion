@@ -4,6 +4,6 @@ namespace Papra.Companion.Data.Repositories.Interfaces;
 
 public interface IPipelineSettingsRepository
 {
-    PipelineSettingsEntity? Get();
+    PipelineSettingsEntity? Find();
     Task UpsertAsync(PipelineSettingsEntity entity);
 }

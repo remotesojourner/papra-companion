@@ -1,6 +1,5 @@
 namespace Papra.Companion.Data.Entities;
 
-/// <summary>Single-row IMAP attachment downloader settings — always Id = 1.</summary>
 public class EmailAttachmentSettingsEntity
 {
     public int Id { get; set; } = 1;

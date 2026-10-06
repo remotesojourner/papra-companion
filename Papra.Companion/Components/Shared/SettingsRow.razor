@@ -1,0 +1,20 @@
+<div class="pc-settings-row">
+    <div class="pc-settings-row-label">
+        <MudText Typo="Typo.subtitle2" HtmlTag="h3" Class="font-weight-bold">@Label</MudText>
+        @if (!string.IsNullOrEmpty(Description))
+        {
+            <MudText Typo="Typo.caption" Class="pc-muted d-block">@Description</MudText>
+        }
+        @LabelContent
+    </div>
+    <div class="pc-settings-row-content">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? LabelContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using MailKit;
 using Papra.Companion.Constants;
@@ -25,7 +26,7 @@ public partial class EmailAttachmentService(
 
         if (!settings.IsConfigured)
         {
-            logger.LogWarning("Email attachment downloader is not configured — skipping run");
+            LogNotConfigured(logger);
             return results;
         }
 
@@ -120,7 +121,6 @@ public partial class EmailAttachmentService(
                     if (!string.IsNullOrWhiteSpace(settings.DeleteCopyFolder))
                     {
                         var copyDest = await OpenFolderAsync(client, settings.DeleteCopyFolder, ct);
-                        // Re-open the source folder — some IMAP servers close it when a second folder is opened.
                         if (!folder.IsOpen)
                             await folder.OpenAsync(FolderAccess.ReadWrite, ct);
                         await folder.CopyToAsync(uid, copyDest, ct);
@@ -205,8 +205,8 @@ public partial class EmailAttachmentService(
                 .Replace("{{subject}}", safeSubject)
                 .Replace("{{ from_email }}", safeFrom)
                 .Replace("{{from_email}}", safeFrom)
-                .Replace("{{ date }}", date.ToString("yyyy-MM-dd"))
-                .Replace("{{date}}", date.ToString("yyyy-MM-dd"));
+                .Replace("{{ date }}", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
+                .Replace("{{date}}", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
         }
         else
         {
@@ -216,12 +216,12 @@ public partial class EmailAttachmentService(
         return Path.Combine(contentRootPath, AppPaths.AttachmentsFolder, filename);
     }
 
-    private static readonly char[] InvalidFileNameChars =
+    private static readonly char[] _invalidFileNameChars =
         [.. Path.GetInvalidFileNameChars().Union([':', '*', '?', '"', '<', '>', '|', '\\', '/'])];
 
     internal static string SanitizePath(string value)
     {
-        foreach (var c in InvalidFileNameChars)
+        foreach (var c in _invalidFileNameChars)
             value = value.Replace(c, '_');
         return value;
     }
@@ -273,6 +273,9 @@ public partial class EmailAttachmentService(
             await client.DisconnectAsync(true, ct);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Email attachment downloader is not configured — skipping run")]
+    private static partial void LogNotConfigured(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Found {Count} messages in {Folder}")]
     private static partial void LogFoundMessages(ILogger logger, int count, string folder);

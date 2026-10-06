@@ -7,7 +7,7 @@ namespace Papra.Companion.Data.Repositories;
 public class EmailAttachmentSettingsRepository(IDbContextFactory<AppDbContext> dbFactory)
     : IEmailAttachmentSettingsRepository
 {
-    public EmailAttachmentSettingsEntity? Get()
+    public EmailAttachmentSettingsEntity? Find()
     {
         using var db = dbFactory.CreateDbContext();
         return db.EmailAttachmentSettings.Find(1);
