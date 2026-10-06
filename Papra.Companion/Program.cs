@@ -160,7 +160,6 @@ app.MapGet("/api/stats", (IPipelineStatusService pipelineStatusService, IEmailAt
     var uptime = DateTimeOffset.UtcNow - appStartTime;
     var recentEmailDownloads = emailAttachmentLogRepository.GetRecent(100);
     var totalEmailDownloads = recentEmailDownloads.Count;
-    var mostRecentDownload = recentEmailDownloads.OrderByDescending(e => e.DownloadedAt).FirstOrDefault();
 
     var stats = new
     {
