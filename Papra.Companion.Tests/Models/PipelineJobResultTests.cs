@@ -5,7 +5,7 @@ namespace Papra.Companion.Tests.Models;
 public class PipelineJobResultTests
 {
     [Fact]
-    public void Duration_WhenCompletedAtIsNull_ReturnsNull()
+    public void DurationWhenCompletedAtIsNullReturnsNull()
     {
         var result = new PipelineJobResult
         {
@@ -17,7 +17,7 @@ public class PipelineJobResultTests
     }
 
     [Fact]
-    public void Duration_WhenCompletedAtIsSet_ReturnsCorrectTimeSpan()
+    public void DurationWhenCompletedAtIsSetReturnsCorrectTimeSpan()
     {
         var start = new DateTimeOffset(2024, 1, 1, 12, 0, 0, TimeSpan.Zero);
         var end = start.AddSeconds(4.5);
@@ -27,7 +27,7 @@ public class PipelineJobResultTests
     }
 
     [Fact]
-    public void Status_DefaultsToQueued()
+    public void StatusDefaultsToQueued()
     {
         var result = new PipelineJobResult();
         Assert.Equal(JobStatus.Queued, result.Status);

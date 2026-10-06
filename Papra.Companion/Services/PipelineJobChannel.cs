@@ -4,7 +4,7 @@ using Papra.Companion.Services.Interfaces;
 
 namespace Papra.Companion.Services;
 
-public class PipelineQueue : IPipelineQueue
+public class PipelineJobChannel : IPipelineJobChannel
 {
     private readonly Channel<ProcessingJob> _channel = Channel.CreateBounded<ProcessingJob>(
         new BoundedChannelOptions(100) { FullMode = BoundedChannelFullMode.Wait });

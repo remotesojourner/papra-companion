@@ -16,17 +16,17 @@ public class PipelineSettingsRepositoryTests
     }
 
     [Fact]
-    public void Get_WhenEmpty_ReturnsNull()
+    public void GetWhenEmptyReturnsNull()
     {
-        var repo = new PipelineSettingsRepository(CreateFactory(nameof(Get_WhenEmpty_ReturnsNull)));
+        var repo = new PipelineSettingsRepository(CreateFactory(nameof(GetWhenEmptyReturnsNull)));
 
-        Assert.Null(repo.Get());
+        Assert.Null(repo.Find());
     }
 
     [Fact]
-    public async Task UpsertAsync_WhenNoExisting_InsertsNewRow()
+    public async Task UpsertAsyncWhenNoExistingInsertsNewRow()
     {
-        var repo = new PipelineSettingsRepository(CreateFactory(nameof(UpsertAsync_WhenNoExisting_InsertsNewRow)));
+        var repo = new PipelineSettingsRepository(CreateFactory(nameof(UpsertAsyncWhenNoExistingInsertsNewRow)));
         var entity = new PipelineSettingsEntity
         {
             PapraBaseUrl = "https://papra.example.com",
@@ -36,7 +36,7 @@ public class PipelineSettingsRepositoryTests
         };
 
         await repo.UpsertAsync(entity);
-        var result = repo.Get();
+        var result = repo.Find();
 
         Assert.NotNull(result);
         Assert.Equal("https://papra.example.com", result.PapraBaseUrl);
@@ -46,9 +46,9 @@ public class PipelineSettingsRepositoryTests
     }
 
     [Fact]
-    public async Task UpsertAsync_WhenExisting_UpdatesAllFields()
+    public async Task UpsertAsyncWhenExistingUpdatesAllFields()
     {
-        var factory = CreateFactory(nameof(UpsertAsync_WhenExisting_UpdatesAllFields));
+        var factory = CreateFactory(nameof(UpsertAsyncWhenExistingUpdatesAllFields));
         var repo = new PipelineSettingsRepository(factory);
 
         await repo.UpsertAsync(new PipelineSettingsEntity
@@ -68,7 +68,7 @@ public class PipelineSettingsRepositoryTests
             ProcessingDelaySeconds = 15,
         });
 
-        var result = repo.Get()!;
+        var result = repo.Find()!;
         Assert.Equal("https://updated.com", result.PapraBaseUrl);
         Assert.Equal("new-token", result.PapraApiToken);
         Assert.Equal("http://localhost:11434/v1/", result.OpenAiBaseUrl);
@@ -79,9 +79,9 @@ public class PipelineSettingsRepositoryTests
     }
 
     [Fact]
-    public async Task UpsertAsync_CalledMultipleTimes_OnlyOneRowExists()
+    public async Task UpsertAsyncCalledMultipleTimesOnlyOneRowExists()
     {
-        var factory = CreateFactory(nameof(UpsertAsync_CalledMultipleTimes_OnlyOneRowExists));
+        var factory = CreateFactory(nameof(UpsertAsyncCalledMultipleTimesOnlyOneRowExists));
         var repo = new PipelineSettingsRepository(factory);
 
         await repo.UpsertAsync(new PipelineSettingsEntity { PapraBaseUrl = "first" });

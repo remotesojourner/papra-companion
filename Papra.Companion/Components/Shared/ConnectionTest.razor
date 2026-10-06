@@ -1,0 +1,44 @@
+<div class="d-flex flex-wrap align-center gap-3">
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Rounded.NetworkCheck" Disabled="_running" OnClick="RunAsync">
+        @if (_running)
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+        }
+        @WebStrings.TestConnection
+    </MudButton>
+    @if (_result != null)
+    {
+        <div class="d-flex align-center gap-1" role="status">
+            <MudIcon Icon="@(_ok ? Icons.Material.Rounded.CheckCircle : Icons.Material.Rounded.Error)" Color="@(_ok ? Color.Success : Color.Error)" Size="Size.Small" />
+            <MudText Typo="Typo.body2" Color="@(_ok ? Color.Success : Color.Error)">@_result</MudText>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Func<Task<string>> Test { get; set; } = default!;
+
+    private bool _running;
+    private bool _ok;
+    private string? _result;
+
+    private async Task RunAsync()
+    {
+        _running = true;
+        _result = null;
+        try
+        {
+            _result = await Test();
+            _ok = true;
+        }
+        catch (Exception ex)
+        {
+            _result = WebStrings.Format(WebStrings.TestConnectionFailed, ex.Message);
+            _ok = false;
+        }
+        finally
+        {
+            _running = false;
+        }
+    }
+}

@@ -3,9 +3,6 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace Papra.Companion.Data;
 
-/// <summary>
-/// Used by EF Core CLI tools (dotnet ef migrations add / database update).
-/// </summary>
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)

@@ -1,0 +1,135 @@
+@inject IEmailAttachmentSettingsService EmailSettingsService
+@inject IEmailAttachmentService EmailAttachmentService
+@inject ISnackbar Snackbar
+
+<SurfaceCard Icon="@Icons.Material.Rounded.Email" Title="@WebStrings.FeatureEmailAttachments" FullHeight="false"
+             Description="@(Saved.IsConfigured ? WebStrings.SettingsEmailDescription : WebStrings.EmailEnableNeedsConnection)">
+    <HeaderActions>
+        <MudSwitch T="bool" Value="@Saved.Enabled" ValueChanged="SetEnabled" Disabled="@(!Saved.IsConfigured)" Color="Color.Primary"
+                   Label="@WebStrings.ImapEnabled" Class="pc-header-switch" />
+    </HeaderActions>
+    <ChildContent>
+        <SettingsRow Label="@WebStrings.RowServer">
+            <div class="pc-fields">
+                <MudTextField T="string" @bind-Value="_email.Host" Label="@WebStrings.ImapHost" Placeholder="imap.example.com"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-field-grow" />
+                <MudNumericField T="int" @bind-Value="_email.Port" Label="@WebStrings.ImapPort" Min="1" Max="65535"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-field-small" />
+            </div>
+            <div class="pc-fields">
+                <MudTextField T="string" @bind-Value="_email.Username" Label="@WebStrings.ImapUsername" Placeholder="user@example.com"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
+                <SecretField @bind-Value="_email.Password" Label="@WebStrings.ImapPassword" Saved="@(!string.IsNullOrWhiteSpace(Saved.Password))"
+                             SavedPlaceholder="@WebStrings.ImapPasswordSaved" />
+            </div>
+            <div class="pc-checks">
+                <MudCheckBox T="bool" @bind-Value="_email.UseSsl" Dense="true" Color="Color.Primary" Label="@WebStrings.ImapSsl" />
+                <MudCheckBox T="bool" @bind-Value="_email.UseStartTls" Dense="true" Color="Color.Primary" Label="@WebStrings.ImapStartTls" />
+            </div>
+        </SettingsRow>
+        <SettingsRow Label="@WebStrings.RowFilter" Description="@WebStrings.RowFilterDescription">
+            <div class="pc-fields">
+                <MudTextField T="string" @bind-Value="_email.ImapFolder" Label="@WebStrings.FilterFolder" Placeholder="INBOX"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-field-medium" />
+                <MudTextField T="string" @bind-Value="_email.SubjectRegex" Label="@WebStrings.FilterSubject" Placeholder="@WebStrings.FilterSubjectPlaceholder"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-mono pc-field-grow" />
+            </div>
+            <div class="pc-checks">
+                <MudCheckBox T="bool" @bind-Value="_email.SubjectRegexIgnoreCase" Dense="true" Color="Color.Primary" Label="@WebStrings.FilterIgnoreCase" />
+                <MudCheckBox T="bool" @bind-Value="_email.SubjectRegexMatchAnywhere" Dense="true" Color="Color.Primary" Label="@WebStrings.FilterMatchAnywhere" />
+            </div>
+        </SettingsRow>
+        <SettingsRow Label="@WebStrings.RowSaving" Description="@WebStrings.RowSavingDescription">
+            <div class="pc-fields">
+                <MudNumericField T="int" @bind-Value="_email.PollIntervalSeconds" Label="@WebStrings.SchedulePollInterval" Min="60"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-field-medium" />
+                <MudTextField T="string" @bind-Value="_email.FilenameTemplate" Label="@WebStrings.ScheduleFilenameTemplate" Placeholder="{{ date }}/{{ subject }}/{{ attachment_name }}"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-mono pc-field-grow" />
+            </div>
+            <PlaceholderList Placeholders="@_filenameTemplatePlaceholders" />
+        </SettingsRow>
+        <SettingsRow Label="@WebStrings.RowAfterwards">
+            <div class="pc-fields pc-fields-center">
+                <MudSwitch T="bool" @bind-Value="_email.DeleteAfterDownload" Color="Color.Primary" Label="@WebStrings.AfterDelete" />
+                @if (_email.DeleteAfterDownload)
+                {
+                    <MudTextField T="string" @bind-Value="_email.DeleteCopyFolder" Label="@WebStrings.AfterCopyFolder" Placeholder="@WebStrings.AfterCopyFolderPlaceholder"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Class="pc-field-medium" />
+                }
+            </div>
+        </SettingsRow>
+    </ChildContent>
+    <Footer>
+        <ConnectionTest Test="TestAsync" />
+        <CardSave Dirty="Dirty" OnSave="SaveAsync" />
+    </Footer>
+</SurfaceCard>
+
+@code {
+    private static readonly (string Token, string Description)[] _filenameTemplatePlaceholders =
+    [
+        ("{{ date }}", WebStrings.PlaceholderDate),
+        ("{{ subject }}", WebStrings.PlaceholderSubject),
+        ("{{ attachment_name }}", WebStrings.PlaceholderAttachmentName),
+        ("{{ from_email }}", WebStrings.PlaceholderFromEmail),
+        ("{{ message_id }}", WebStrings.PlaceholderMessageId)
+    ];
+
+    private EmailAttachmentSettings _email = new();
+
+    private EmailAttachmentSettings Saved => EmailSettingsService.Current;
+
+    private bool Dirty =>
+        _email.Host != Saved.Host || _email.Port != Saved.Port || _email.Username != Saved.Username
+        || !string.IsNullOrWhiteSpace(_email.Password) || _email.UseSsl != Saved.UseSsl || _email.UseStartTls != Saved.UseStartTls
+        || _email.ImapFolder != Saved.ImapFolder || _email.SubjectRegex != Saved.SubjectRegex
+        || _email.SubjectRegexIgnoreCase != Saved.SubjectRegexIgnoreCase || _email.SubjectRegexMatchAnywhere != Saved.SubjectRegexMatchAnywhere
+        || _email.PollIntervalSeconds != Saved.PollIntervalSeconds || _email.FilenameTemplate != Saved.FilenameTemplate
+        || _email.DeleteAfterDownload != Saved.DeleteAfterDownload || _email.DeleteCopyFolder != Saved.DeleteCopyFolder;
+
+    protected override void OnInitialized() => Load(Saved);
+
+    private void Load(EmailAttachmentSettings settings)
+    {
+        _email = settings.Clone();
+        _email.Password = "";
+    }
+
+    private EmailAttachmentSettings Edited()
+    {
+        var settings = _email.Clone();
+        if (string.IsNullOrWhiteSpace(settings.Password)) settings.Password = Saved.Password;
+        return settings;
+    }
+
+    private Task<string> TestAsync() => EmailAttachmentService.TestConnectionAsync(Edited(), CancellationToken.None);
+
+    private void SetEnabled(bool enabled)
+    {
+        var settings = Saved.Clone();
+        settings.Enabled = enabled;
+        EmailSettingsService.Save(settings);
+        _email.Enabled = enabled;
+        Snackbar.Add(enabled ? WebStrings.EmailDownloaderOn : WebStrings.EmailDownloaderOff, Severity.Success);
+    }
+
+    private async Task SaveAsync()
+    {
+        var settings = Edited();
+        settings.Enabled = Saved.Enabled;
+        EmailSettingsService.Save(settings);
+        Load(settings);
+        Snackbar.Add(WebStrings.SettingsSaved, Severity.Success);
+
+        if (!settings.IsConfigured || !settings.DeleteAfterDownload || string.IsNullOrWhiteSpace(settings.DeleteCopyFolder)) return;
+
+        try
+        {
+            await EmailAttachmentService.EnsureCopyFolderExistsAsync(CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(WebStrings.Format(WebStrings.EmailCopyFolderFailed, ex.Message), Severity.Warning);
+        }
+    }
+}

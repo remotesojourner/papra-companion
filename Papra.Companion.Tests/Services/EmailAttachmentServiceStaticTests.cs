@@ -6,17 +6,15 @@ namespace Papra.Companion.Tests.Services;
 
 public class EmailAttachmentServiceStaticTests
 {
-    // ── BuildSubjectRegex ────────────────────────────────────────────────────
-
     [Fact]
-    public void BuildSubjectRegex_WhenNoPattern_ReturnsNull()
+    public void BuildSubjectRegexWhenNoPatternReturnsNull()
     {
         var settings = new EmailAttachmentSettings { SubjectRegex = string.Empty };
         Assert.Null(EmailAttachmentService.BuildSubjectRegex(settings));
     }
 
     [Fact]
-    public void BuildSubjectRegex_DefaultSettings_AnchoredToStart()
+    public void BuildSubjectRegexDefaultSettingsAnchoredToStart()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -27,11 +25,11 @@ public class EmailAttachmentServiceStaticTests
         var regex = EmailAttachmentService.BuildSubjectRegex(settings)!;
 
         Assert.Matches(regex, "Invoice 2024");
-        Assert.DoesNotMatch(regex, "Re: Invoice 2024"); // anchored — no match mid-string
+        Assert.DoesNotMatch(regex, "Re: Invoice 2024");
     }
 
     [Fact]
-    public void BuildSubjectRegex_MatchAnywhere_MatchesMidString()
+    public void BuildSubjectRegexMatchAnywhereMatchesMidString()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -45,7 +43,7 @@ public class EmailAttachmentServiceStaticTests
     }
 
     [Fact]
-    public void BuildSubjectRegex_CaseInsensitive_MatchesRegardlessOfCase()
+    public void BuildSubjectRegexCaseInsensitiveMatchesRegardlessOfCase()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -60,7 +58,7 @@ public class EmailAttachmentServiceStaticTests
     }
 
     [Fact]
-    public void BuildSubjectRegex_CaseSensitive_DoesNotMatchWrongCase()
+    public void BuildSubjectRegexCaseSensitiveDoesNotMatchWrongCase()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -74,17 +72,15 @@ public class EmailAttachmentServiceStaticTests
         Assert.Matches(regex, "invoice 123");
     }
 
-    // ── SanitizePath ─────────────────────────────────────────────────────────
-
     [Fact]
-    public void SanitizePath_ValidFilename_ReturnsSameValue()
+    public void SanitizePathValidFilenameReturnsSameValue()
     {
         var result = EmailAttachmentService.SanitizePath("valid-filename.pdf");
         Assert.Equal("valid-filename.pdf", result);
     }
 
     [Fact]
-    public void SanitizePath_InvalidChars_ReplacedWithUnderscore()
+    public void SanitizePathInvalidCharsReplacedWithUnderscore()
     {
         var result = EmailAttachmentService.SanitizePath("file:name/with\\bad*chars?.pdf");
         Assert.DoesNotContain(":", result);
@@ -94,10 +90,8 @@ public class EmailAttachmentServiceStaticTests
         Assert.DoesNotContain("?", result);
     }
 
-    // ── BuildSavePath ─────────────────────────────────────────────────────────
-
     [Fact]
-    public void BuildSavePath_NoTemplate_UsesAttachmentName()
+    public void BuildSavePathNoTemplateUsesAttachmentName()
     {
         var settings = new EmailAttachmentSettings { FilenameTemplate = string.Empty };
         var date = new DateTimeOffset(2024, 3, 15, 0, 0, 0, TimeSpan.Zero);
@@ -109,7 +103,7 @@ public class EmailAttachmentServiceStaticTests
     }
 
     [Fact]
-    public void BuildSavePath_WithTemplate_InterpolatesAllPlaceholders()
+    public void BuildSavePathWithTemplateInterpolatesAllPlaceholders()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -125,7 +119,7 @@ public class EmailAttachmentServiceStaticTests
     }
 
     [Fact]
-    public void BuildSavePath_WithTemplate_SpacedPlaceholdersAlsoWork()
+    public void BuildSavePathWithTemplateSpacedPlaceholdersAlsoWork()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -141,7 +135,7 @@ public class EmailAttachmentServiceStaticTests
     }
 
     [Fact]
-    public void BuildSavePath_WithTemplate_MessageIdAndFromEmailInterpolated()
+    public void BuildSavePathWithTemplateMessageIdAndFromEmailInterpolated()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -157,7 +151,7 @@ public class EmailAttachmentServiceStaticTests
     }
 
     [Fact]
-    public void BuildSavePath_AttachmentNameWithInvalidChars_Sanitized()
+    public void BuildSavePathAttachmentNameWithInvalidCharsSanitized()
     {
         var settings = new EmailAttachmentSettings { FilenameTemplate = string.Empty };
         var date = DateTimeOffset.UtcNow;
@@ -171,7 +165,7 @@ public class EmailAttachmentServiceStaticTests
     }
 
     [Fact]
-    public void BuildSavePath_IsUnderAttachmentsFolder()
+    public void BuildSavePathIsUnderAttachmentsFolder()
     {
         var settings = new EmailAttachmentSettings { FilenameTemplate = string.Empty };
 

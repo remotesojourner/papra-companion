@@ -24,9 +24,9 @@ public class EmailAttachmentsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void EmailAttachments_WhenNotConfigured_ShowsWarning()
+    public void EmailAttachmentsWhenNotConfiguredShowsWarning()
     {
-        _settingsSvc.Current.Returns(new EmailAttachmentSettings()); // not configured
+        _settingsSvc.Current.Returns(new EmailAttachmentSettings());
 
         var cut = Render<EmailAttachments>();
 
@@ -34,7 +34,7 @@ public class EmailAttachmentsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void EmailAttachments_WhenConfiguredButDisabled_ShowsDisabledInfo()
+    public void EmailAttachmentsWhenConfiguredButDisabledShowsDisabledInfo()
     {
         _settingsSvc.Current.Returns(new EmailAttachmentSettings
         {
@@ -47,7 +47,7 @@ public class EmailAttachmentsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void EmailAttachments_WhenConfiguredAndEnabled_ShowsNoWarnings()
+    public void EmailAttachmentsWhenConfiguredAndEnabledShowsNoWarnings()
     {
         _settingsSvc.Current.Returns(new EmailAttachmentSettings
         {
@@ -61,7 +61,7 @@ public class EmailAttachmentsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void EmailAttachments_WithNoLogs_ShowsEmptyState()
+    public void EmailAttachmentsWithNoLogsShowsEmptyState()
     {
         _settingsSvc.Current.Returns(new EmailAttachmentSettings
         {
@@ -75,7 +75,7 @@ public class EmailAttachmentsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void EmailAttachments_WithLogs_ShowsHistoryTable()
+    public void EmailAttachmentsWithLogsShowsHistoryTable()
     {
         _settingsSvc.Current.Returns(new EmailAttachmentSettings
         {
@@ -105,7 +105,7 @@ public class EmailAttachmentsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void EmailAttachments_WithFailedLog_ShowsFailedBadge()
+    public void EmailAttachmentsWithFailedLogShowsFailedBadge()
     {
         _settingsSvc.Current.Returns(new EmailAttachmentSettings
         {
@@ -133,7 +133,7 @@ public class EmailAttachmentsPageTests : ComponentTestBase
     }
 
     [Fact]
-    public void EmailAttachments_StatsReflectLogCounts()
+    public void EmailAttachmentsStatsReflectLogCounts()
     {
         _settingsSvc.Current.Returns(new EmailAttachmentSettings
         {
@@ -149,7 +149,6 @@ public class EmailAttachmentsPageTests : ComponentTestBase
         var cut = Render<EmailAttachments>();
         var markup = cut.Markup;
 
-        // Total=3, Succeeded=2, Failed=1
         Assert.Contains(">3<", markup);
         Assert.Contains(">2<", markup);
         Assert.Contains(">1<", markup);

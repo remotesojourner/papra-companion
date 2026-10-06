@@ -27,7 +27,6 @@ public partial class TitleGenerationService(
         {
             LogProcessingDocument(logger, job.DocumentId, job.OrganizationId);
 
-            // Optional delay before processing (gives Papra time to finish indexing)
             if (settings.ProcessingDelaySeconds > 0)
             {
                 LogDelayingProcessing(logger, settings.ProcessingDelaySeconds);
@@ -66,7 +65,7 @@ public partial class TitleGenerationService(
             result.ExtractedTitle = title;
 
             await papraService.UpdateDocumentTitleAsync(job.OrganizationId, job.DocumentId, title, ct);
-            logger.LogInformation("Updated document title");
+            LogTitleUpdated(logger);
 
             result.Status = JobStatus.Succeeded;
             LogDocumentProcessed(logger, job.DocumentId);
@@ -89,6 +88,9 @@ public partial class TitleGenerationService(
             statusService.JobCompleted(result);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Updated document title")]
+    private static partial void LogTitleUpdated(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Processing document {DocumentId} for org {OrgId}")]
     private static partial void LogProcessingDocument(ILogger logger, string documentId, string orgId);

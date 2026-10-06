@@ -20,7 +20,7 @@ public class PapraService(ISettingsService settingsService) : IPapraService
     public async Task<(string Name, string? Content)> GetDocumentInfoAsync(string orgId, string docId, CancellationToken ct)
     {
         using var client = CreateClient();
-        var response = await client.GetAsync($"{BaseUrl}{string.Format(PapraConstants.DocumentsRoute, orgId, docId)}", ct);
+        var response = await client.GetAsync($"{BaseUrl}{PapraConstants.DocumentRoute(orgId, docId)}", ct);
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync(ct);
@@ -36,7 +36,7 @@ public class PapraService(ISettingsService settingsService) : IPapraService
     public async Task UpdateDocumentTitleAsync(string orgId, string docId, string name, CancellationToken ct)
     {
         using var client = CreateClient();
-        var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"{BaseUrl}{string.Format(PapraConstants.DocumentsRoute, orgId, docId)}")
+        var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"{BaseUrl}{PapraConstants.DocumentRoute(orgId, docId)}")
         {
             Content = JsonContent.Create(new PapraUpdateDocumentTitleRequest(Name: name))
         };

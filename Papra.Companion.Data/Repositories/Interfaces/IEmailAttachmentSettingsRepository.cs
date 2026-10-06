@@ -4,6 +4,6 @@ namespace Papra.Companion.Data.Repositories.Interfaces;
 
 public interface IEmailAttachmentSettingsRepository
 {
-    EmailAttachmentSettingsEntity? Get();
+    EmailAttachmentSettingsEntity? Find();
     Task UpsertAsync(EmailAttachmentSettingsEntity entity);
 }

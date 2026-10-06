@@ -1,0 +1,25 @@
+<SurfaceCard Icon="@Icon" Title="@Title">
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+    else
+    {
+        <div class="pc-stat-value">
+            <MudText Typo="Typo.h4" Class="pc-hero-value font-weight-bold" Color="@Color">@Value</MudText>
+        </div>
+        @if (!string.IsNullOrEmpty(Label))
+        {
+            <MudText Typo="Typo.caption" Class="pc-muted d-block">@Label</MudText>
+        }
+    }
+</SurfaceCard>
+
+@code {
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public Color Color { get; set; } = Color.Default;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

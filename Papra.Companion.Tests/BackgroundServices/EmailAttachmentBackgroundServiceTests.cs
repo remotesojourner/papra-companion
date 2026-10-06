@@ -26,7 +26,7 @@ public class EmailAttachmentBackgroundServiceTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenEnabledAndConfigured_CallsRunAsync()
+    public async Task ExecuteAsyncWhenEnabledAndConfiguredCallsRunAsync()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -52,7 +52,7 @@ public class EmailAttachmentBackgroundServiceTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenDisabled_DoesNotCallRunAsync()
+    public async Task ExecuteAsyncWhenDisabledDoesNotCallRunAsync()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -75,9 +75,8 @@ public class EmailAttachmentBackgroundServiceTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenNotConfigured_DoesNotCallRunAsync()
+    public async Task ExecuteAsyncWhenNotConfiguredDoesNotCallRunAsync()
     {
-        // Missing password — IsConfigured returns false
         var settings = new EmailAttachmentSettings
         {
             Enabled = true,
@@ -99,7 +98,7 @@ public class EmailAttachmentBackgroundServiceTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenRunAsyncThrows_ContinuesLoop()
+    public async Task ExecuteAsyncWhenRunAsyncThrowsContinuesLoop()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -119,7 +118,7 @@ public class EmailAttachmentBackgroundServiceTests
                      .Do(_ =>
                      {
                          callCount++;
-                         if (callCount == 1) throw new Exception("transient error");
+                         if (callCount == 1) throw new InvalidOperationException("transient error");
                          if (callCount == 2) cts.Cancel();
                      });
 
@@ -131,7 +130,7 @@ public class EmailAttachmentBackgroundServiceTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenCancelled_StopsGracefully()
+    public async Task ExecuteAsyncWhenCancelledStopsGracefully()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -139,7 +138,7 @@ public class EmailAttachmentBackgroundServiceTests
             Host = "imap.example.com",
             Username = "u",
             Password = "p",
-            PollIntervalSeconds = 3600, // long delay so it sits in Task.Delay
+            PollIntervalSeconds = 3600,
         };
         var settingsSvc = MakeSettingsService(settings);
         var (provider, _) = BuildServiceProvider();
@@ -153,8 +152,7 @@ public class EmailAttachmentBackgroundServiceTests
         Assert.True(bgSvc.ExecuteTask!.IsCompleted);
     }
 
-    // Expose ExecuteTask
-    private class EmailAttachmentBackgroundService(
+    private sealed class EmailAttachmentBackgroundService(
         IEmailAttachmentSettingsService settingsSvc,
         IServiceProvider services,
         Microsoft.Extensions.Logging.ILogger<Papra.Companion.BackgroundServices.EmailAttachmentBackgroundService> logger)

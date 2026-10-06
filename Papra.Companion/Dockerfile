@@ -7,6 +7,7 @@ EXPOSE 1003
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["Directory.Packages.props", "./"]
 COPY ["Papra.Companion/Papra.Companion.csproj", "Papra.Companion/"]
 COPY ["Papra.Companion.Data/Papra.Companion.Data.csproj", "Papra.Companion.Data/"]
 RUN dotnet restore "./Papra.Companion/Papra.Companion.csproj"

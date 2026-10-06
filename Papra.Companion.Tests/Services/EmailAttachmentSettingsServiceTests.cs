@@ -11,12 +11,12 @@ public class EmailAttachmentSettingsServiceTests
     private static IEmailAttachmentSettingsRepository EmptyRepository()
     {
         var repo = Substitute.For<IEmailAttachmentSettingsRepository>();
-        repo.Get().Returns((EmailAttachmentSettingsEntity?)null);
+        repo.Find().Returns((EmailAttachmentSettingsEntity?)null);
         return repo;
     }
 
     [Fact]
-    public void Current_WhenRepositoryEmpty_ReturnsDefaults()
+    public void CurrentWhenRepositoryEmptyReturnsDefaults()
     {
         var service = new EmailAttachmentSettingsService(EmptyRepository());
 
@@ -30,7 +30,7 @@ public class EmailAttachmentSettingsServiceTests
     }
 
     [Fact]
-    public void Current_WhenRepositoryHasEntity_MapsAllFields()
+    public void CurrentWhenRepositoryHasEntityMapsAllFields()
     {
         var entity = new EmailAttachmentSettingsEntity
         {
@@ -51,7 +51,7 @@ public class EmailAttachmentSettingsServiceTests
             PollIntervalSeconds = 60,
         };
         var repo = Substitute.For<IEmailAttachmentSettingsRepository>();
-        repo.Get().Returns(entity);
+        repo.Find().Returns(entity);
 
         var service = new EmailAttachmentSettingsService(repo);
         var current = service.Current;
@@ -74,7 +74,7 @@ public class EmailAttachmentSettingsServiceTests
     }
 
     [Fact]
-    public void Save_UpdatesCurrentImmediately()
+    public void SaveUpdatesCurrentImmediately()
     {
         var service = new EmailAttachmentSettingsService(EmptyRepository());
 
@@ -90,7 +90,7 @@ public class EmailAttachmentSettingsServiceTests
     }
 
     [Fact]
-    public void Save_RaisesOnChangedEvent()
+    public void SaveRaisesOnChangedEvent()
     {
         var service = new EmailAttachmentSettingsService(EmptyRepository());
         var raised = false;
@@ -102,7 +102,7 @@ public class EmailAttachmentSettingsServiceTests
     }
 
     [Fact]
-    public void IsConfigured_WhenAllRequiredFieldsPresent_ReturnsTrue()
+    public void IsConfiguredWhenAllRequiredFieldsPresentReturnsTrue()
     {
         var settings = new EmailAttachmentSettings
         {
@@ -117,7 +117,7 @@ public class EmailAttachmentSettingsServiceTests
     [InlineData("", "user", "pass")]
     [InlineData("host", "", "pass")]
     [InlineData("host", "user", "")]
-    public void IsConfigured_WhenAnyRequiredFieldMissing_ReturnsFalse(
+    public void IsConfiguredWhenAnyRequiredFieldMissingReturnsFalse(
         string host, string username, string password)
     {
         var settings = new EmailAttachmentSettings

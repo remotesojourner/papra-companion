@@ -1,0 +1,27 @@
+<div class="pc-card-save">
+    @if (Dirty)
+    {
+        <MudText Typo="Typo.caption" Class="pc-unsaved">@WebStrings.UnsavedChanges</MudText>
+    }
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!Dirty || _saving)" OnClick="SaveAsync">@WebStrings.Save</MudButton>
+</div>
+
+@code {
+    [Parameter] public bool Dirty { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+
+    private bool _saving;
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        try
+        {
+            await OnSave.InvokeAsync();
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

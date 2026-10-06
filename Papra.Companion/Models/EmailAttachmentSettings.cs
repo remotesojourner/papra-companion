@@ -22,4 +22,6 @@ public class EmailAttachmentSettings
         !string.IsNullOrWhiteSpace(Host) &&
         !string.IsNullOrWhiteSpace(Username) &&
         !string.IsNullOrWhiteSpace(Password);
+
+    public EmailAttachmentSettings Clone() => (EmailAttachmentSettings)MemberwiseClone();
 }

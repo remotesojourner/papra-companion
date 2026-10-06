@@ -1,0 +1,68 @@
+@inject ISettingsService SettingsService
+@inject IPapraService PapraService
+@inject BrowserInteropService Browser
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<SurfaceCard Icon="@Icons.Material.Rounded.Description" Title="@WebStrings.SettingsTabPapra" FullHeight="false"
+             Description="@WebStrings.SettingsPapraDescription">
+    <ChildContent>
+        <SettingsRow Label="@WebStrings.RowConnection">
+            <div class="pc-fields">
+                <MudTextField T="string" @bind-Value="_baseUrl" Label="@WebStrings.PapraBaseUrl" Placeholder="https://documents.example.com"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" />
+                <SecretField @bind-Value="_apiToken" Label="@WebStrings.PapraApiToken" Saved="@(!string.IsNullOrWhiteSpace(Saved.PapraApiToken))"
+                             SavedPlaceholder="@WebStrings.PapraApiTokenSaved"
+                             Placeholder="@WebStrings.PapraApiTokenPlaceholder" />
+            </div>
+        </SettingsRow>
+        <SettingsRow Label="@WebStrings.WebhookTitle" Description="@WebStrings.WebhookDescription">
+            <MudTextField T="string" Value="@WebhookUrl" Label="@WebStrings.WebhookUrl" ReadOnly="true"
+                          Variant="Variant.Outlined" Margin="Margin.Dense" Class="pc-mono"
+                          Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Rounded.ContentCopy"
+                          AdornmentAriaLabel="@WebStrings.WebhookCopy" OnAdornmentClick="CopyWebhookUrlAsync" />
+        </SettingsRow>
+    </ChildContent>
+    <Footer>
+        <ConnectionTest Test="TestAsync" />
+        <CardSave Dirty="Dirty" OnSave="Save" />
+    </Footer>
+</SurfaceCard>
+
+@code {
+    private string _baseUrl = "";
+    private string _apiToken = "";
+
+    private PipelineSettings Saved => SettingsService.Current;
+
+    private string WebhookUrl => Navigation.BaseUri.TrimEnd('/') + "/webhook/document";
+
+    private string BaseUrlToSave => _baseUrl.Trim().TrimEnd('/');
+
+    private string TokenToUse => string.IsNullOrWhiteSpace(_apiToken) ? Saved.PapraApiToken : _apiToken.Trim();
+
+    private bool Dirty => BaseUrlToSave != Saved.PapraBaseUrl || !string.IsNullOrWhiteSpace(_apiToken);
+
+    protected override void OnInitialized() => _baseUrl = Saved.PapraBaseUrl;
+
+    private Task<string> TestAsync() => PapraService.TestConnectionAsync(BaseUrlToSave, TokenToUse, CancellationToken.None);
+
+    private void Save()
+    {
+        var settings = Saved.Clone();
+        settings.PapraBaseUrl = BaseUrlToSave;
+        settings.PapraApiToken = TokenToUse;
+        SettingsService.Save(settings);
+        _baseUrl = settings.PapraBaseUrl;
+        _apiToken = "";
+        Snackbar.Add(WebStrings.SettingsSaved, Severity.Success);
+    }
+
+    private async Task CopyWebhookUrlAsync()
+    {
+        if (await Browser.CopyTextAsync(WebhookUrl))
+            Snackbar.Add(WebStrings.WebhookCopied, Severity.Success);
+        else
+            Snackbar.Add(WebStrings.WebhookCopyFailed, Severity.Warning);
+    }
+}

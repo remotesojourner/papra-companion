@@ -9,16 +9,16 @@ using Papra.Companion.Services.Interfaces;
 
 namespace Papra.Companion.Tests;
 
-public class WebhookEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public class WebhookEndpointTests : IClassFixture<TestAppFactory>
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly ISettingsService _settingsServiceMock;
-    private readonly IPipelineQueue _pipelineQueueMock;
+    private readonly IPipelineJobChannel _pipelineQueueMock;
 
-    public WebhookEndpointTests(WebApplicationFactory<Program> factory)
+    public WebhookEndpointTests(TestAppFactory factory)
     {
         _settingsServiceMock = Substitute.For<ISettingsService>();
-        _pipelineQueueMock = Substitute.For<IPipelineQueue>();
+        _pipelineQueueMock = Substitute.For<IPipelineJobChannel>();
 
         _factory = factory.WithWebHostBuilder(builder =>
         {
@@ -27,89 +27,77 @@ public class WebhookEndpointTests : IClassFixture<WebApplicationFactory<Program>
                 services.RemoveAll<ISettingsService>();
                 services.AddSingleton(_settingsServiceMock);
 
-                services.RemoveAll<IPipelineQueue>();
+                services.RemoveAll<IPipelineJobChannel>();
                 services.AddSingleton(_pipelineQueueMock);
             });
         });
     }
 
     [Fact]
-    public async Task PostWebhook_WhenNotConfigured_Returns503()
+    public async Task PostWebhookWhenNotConfiguredReturns503()
     {
-        // Arrange
         var client = _factory.CreateClient();
-        _settingsServiceMock.Current.Returns(new PipelineSettings()); // IsConfigured is false
+        _settingsServiceMock.Current.Returns(new PipelineSettings());
 
         var payload = new { data = new { organizationId = "org1", documentId = "doc1" } };
 
-        // Act
         var response = await client.PostAsJsonAsync("/webhook/document", payload, TestContext.Current.CancellationToken);
 
-        // Assert
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
     }
 
     [Fact]
-    public async Task PostWebhook_WithInvalidJson_Returns400()
+    public async Task PostWebhookWithInvalidJsonReturns400()
     {
-        // Arrange
         var client = _factory.CreateClient();
         _settingsServiceMock.Current.Returns(new PipelineSettings 
         { 
             PapraBaseUrl = "https://example.com",
             PapraApiToken = "test",
             OpenAiApiKey = "test"
-        }); // IsConfigured is true
+        });
 
         var content = new StringContent("invalid json");
         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-        // Act
         var response = await client.PostAsync("/webhook/document", content, TestContext.Current.CancellationToken);
 
-        // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task PostWebhook_WithMissingData_Returns400()
+    public async Task PostWebhookWithMissingDataReturns400()
     {
-        // Arrange
         var client = _factory.CreateClient();
         _settingsServiceMock.Current.Returns(new PipelineSettings 
         { 
             PapraBaseUrl = "https://example.com",
             PapraApiToken = "test",
             OpenAiApiKey = "test"
-        }); // IsConfigured is true
+        });
 
         var payload = new { data = new { organizationId = "", documentId = "" } };
 
-        // Act
         var response = await client.PostAsJsonAsync("/webhook/document", payload, TestContext.Current.CancellationToken);
 
-        // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
-    public async Task PostWebhook_WithValidData_EnqueuesJobAndReturns202()
+    public async Task PostWebhookWithValidDataEnqueuesJobAndReturns202()
     {
-        // Arrange
         var client = _factory.CreateClient();
         _settingsServiceMock.Current.Returns(new PipelineSettings 
         { 
             PapraBaseUrl = "https://example.com",
             PapraApiToken = "test",
             OpenAiApiKey = "test"
-        }); // IsConfigured is true
+        });
 
         var payload = new { data = new { organizationId = "org-123", documentId = "doc-456" } };
 
-        // Act
         var response = await client.PostAsJsonAsync("/webhook/document", payload, TestContext.Current.CancellationToken);
 
-        // Assert
         Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
         
         await _pipelineQueueMock.Received(1).EnqueueAsync(Arg.Is<ProcessingJob>(j => 

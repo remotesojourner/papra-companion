@@ -9,7 +9,7 @@ public partial class EmailAttachmentBackgroundService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Email attachment downloader background service started");
+        LogStarted(logger);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -31,7 +31,7 @@ public partial class EmailAttachmentBackgroundService(
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Unhandled error in email attachment downloader");
+                    LogUnhandledError(logger, ex);
                 }
             }
 
@@ -45,8 +45,17 @@ public partial class EmailAttachmentBackgroundService(
             }
         }
 
-        logger.LogInformation("Email attachment downloader background service stopped");
+        LogStopped(logger);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email attachment downloader background service started")]
+    private static partial void LogStarted(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email attachment downloader background service stopped")]
+    private static partial void LogStopped(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled error in email attachment downloader")]
+    private static partial void LogUnhandledError(ILogger logger, Exception ex);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Email attachment run complete: {Count} attachments processed")]
     private static partial void LogRunComplete(ILogger logger, int count);

@@ -16,21 +16,21 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void CurrentJob_InitiallyNull()
+    public void CurrentJobInitiallyNull()
     {
         var service = new PipelineStatusService(EmptyRepository());
         Assert.Null(service.CurrentJob);
     }
 
     [Fact]
-    public void RecentJobs_InitiallyEmpty()
+    public void RecentJobsInitiallyEmpty()
     {
         var service = new PipelineStatusService(EmptyRepository());
         Assert.Empty(service.RecentJobs);
     }
 
     [Fact]
-    public void JobStarted_SetsCurrentJobAndStatus()
+    public void JobStartedSetsCurrentJobAndStatus()
     {
         var service = new PipelineStatusService(EmptyRepository());
         var job = new PipelineJobResult { DocumentId = "doc1", OrganizationId = "org1" };
@@ -42,7 +42,7 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void JobStarted_RaisesOnChangedEvent()
+    public void JobStartedRaisesOnChangedEvent()
     {
         var service = new PipelineStatusService(EmptyRepository());
         var raised = false;
@@ -54,7 +54,7 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void JobCompleted_ClearsCurrentJob()
+    public void JobCompletedClearsCurrentJob()
     {
         var service = new PipelineStatusService(EmptyRepository());
         var job = new PipelineJobResult { DocumentId = "doc1" };
@@ -66,7 +66,7 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void JobCompleted_AddsToRecentJobs()
+    public void JobCompletedAddsToRecentJobs()
     {
         var service = new PipelineStatusService(EmptyRepository());
         var job = new PipelineJobResult { DocumentId = "doc1" };
@@ -78,7 +78,7 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void JobCompleted_InsertsAtFront()
+    public void JobCompletedInsertsAtFront()
     {
         var service = new PipelineStatusService(EmptyRepository());
         var first = new PipelineJobResult { DocumentId = "first" };
@@ -92,7 +92,7 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void JobCompleted_CapsAtHundredJobs()
+    public void JobCompletedCapsAtHundredJobs()
     {
         var service = new PipelineStatusService(EmptyRepository());
 
@@ -103,7 +103,7 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void RecentJobs_LoadedFromRepositoryOnConstruction()
+    public void RecentJobsLoadedFromRepositoryOnConstruction()
     {
         var repo = Substitute.For<IJobResultRepository>();
         repo.GetRecent(Arg.Any<int>()).Returns(
@@ -119,7 +119,7 @@ public class PipelineStatusServiceTests
     }
 
     [Fact]
-    public void JobCompleted_RaisesOnChangedEvent()
+    public void JobCompletedRaisesOnChangedEvent()
     {
         var service = new PipelineStatusService(EmptyRepository());
         var raised = false;

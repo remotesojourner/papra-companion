@@ -7,7 +7,7 @@ namespace Papra.Companion.Tests.Repositories;
 
 public class EmailAttachmentLogRepositoryTests
 {
-    private static IDbContextFactory<AppDbContext> CreateFactory(string dbName)
+    private static TestDbContextFactory CreateFactory(string dbName)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(dbName)
@@ -32,9 +32,9 @@ public class EmailAttachmentLogRepositoryTests
     };
 
     [Fact]
-    public async Task AddAsync_ThenGetRecent_ReturnsEntry()
+    public async Task AddAsyncThenGetRecentReturnsEntry()
     {
-        var factory = CreateFactory(nameof(AddAsync_ThenGetRecent_ReturnsEntry));
+        var factory = CreateFactory(nameof(AddAsyncThenGetRecentReturnsEntry));
         var repo = new EmailAttachmentLogRepository(factory);
 
         await repo.AddAsync(MakeLog("msg1", "invoice.pdf"));
@@ -46,9 +46,9 @@ public class EmailAttachmentLogRepositoryTests
     }
 
     [Fact]
-    public async Task GetRecent_ReturnsInDescendingDownloadedAtOrder()
+    public async Task GetRecentReturnsInDescendingDownloadedAtOrder()
     {
-        var factory = CreateFactory(nameof(GetRecent_ReturnsInDescendingDownloadedAtOrder));
+        var factory = CreateFactory(nameof(GetRecentReturnsInDescendingDownloadedAtOrder));
         var repo = new EmailAttachmentLogRepository(factory);
         var now = DateTimeOffset.UtcNow;
 
@@ -62,9 +62,9 @@ public class EmailAttachmentLogRepositoryTests
     }
 
     [Fact]
-    public async Task GetRecent_RespectsCountLimit()
+    public async Task GetRecentRespectsCountLimit()
     {
-        var factory = CreateFactory(nameof(GetRecent_RespectsCountLimit));
+        var factory = CreateFactory(nameof(GetRecentRespectsCountLimit));
         var repo = new EmailAttachmentLogRepository(factory);
         var now = DateTimeOffset.UtcNow;
 
@@ -75,9 +75,9 @@ public class EmailAttachmentLogRepositoryTests
     }
 
     [Fact]
-    public async Task HasBeenDownloaded_WhenEntryExists_ReturnsTrue()
+    public async Task HasBeenDownloadedWhenEntryExistsReturnsTrue()
     {
-        var factory = CreateFactory(nameof(HasBeenDownloaded_WhenEntryExists_ReturnsTrue));
+        var factory = CreateFactory(nameof(HasBeenDownloadedWhenEntryExistsReturnsTrue));
         var repo = new EmailAttachmentLogRepository(factory);
         await repo.AddAsync(MakeLog("msg1", "invoice.pdf"));
 
@@ -85,9 +85,9 @@ public class EmailAttachmentLogRepositoryTests
     }
 
     [Fact]
-    public async Task HasBeenDownloaded_WhenEntryAbsent_ReturnsFalse()
+    public async Task HasBeenDownloadedWhenEntryAbsentReturnsFalse()
     {
-        var factory = CreateFactory(nameof(HasBeenDownloaded_WhenEntryAbsent_ReturnsFalse));
+        var factory = CreateFactory(nameof(HasBeenDownloadedWhenEntryAbsentReturnsFalse));
         var repo = new EmailAttachmentLogRepository(factory);
         await repo.AddAsync(MakeLog("msg1", "invoice.pdf"));
 
@@ -96,18 +96,18 @@ public class EmailAttachmentLogRepositoryTests
     }
 
     [Fact]
-    public void HasBeenDownloaded_WhenEmpty_ReturnsFalse()
+    public void HasBeenDownloadedWhenEmptyReturnsFalse()
     {
-        var factory = CreateFactory(nameof(HasBeenDownloaded_WhenEmpty_ReturnsFalse));
+        var factory = CreateFactory(nameof(HasBeenDownloadedWhenEmptyReturnsFalse));
         var repo = new EmailAttachmentLogRepository(factory);
 
         Assert.False(repo.HasBeenDownloaded("any", "any.pdf"));
     }
 
     [Fact]
-    public async Task GetRecent_WhenEmpty_ReturnsEmptyList()
+    public async Task GetRecentWhenEmptyReturnsEmptyList()
     {
-        var factory = CreateFactory(nameof(GetRecent_WhenEmpty_ReturnsEmptyList));
+        var factory = CreateFactory(nameof(GetRecentWhenEmptyReturnsEmptyList));
         var repo = new EmailAttachmentLogRepository(factory);
 
         Assert.Empty(repo.GetRecent(10));

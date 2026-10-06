@@ -1,0 +1,79 @@
+<MudCard Elevation="0" Class="pc-card pc-status-overview" role="region" aria-label="@WebStrings.SettingsStatus">
+    <div class="pc-status-item" data-feature="title-generation">
+        <div class="pc-status-item-header">
+            <MudIcon Icon="@Icons.Material.Rounded.AutoAwesome" Size="Size.Small" Class="pc-muted" />
+            <MudText Typo="Typo.subtitle1" HtmlTag="h2" Class="font-weight-bold flex-grow-1">@WebStrings.FeatureTitleGeneration</MudText>
+            <StatusChip Text="@StateText(TitleState)" Color="@StateColor(TitleState)" Icon="@StateIcon(TitleState)" />
+        </div>
+        <MudText Typo="Typo.body2" Class="pc-muted">
+            @TitleDetail
+            @if (TitleState == FeatureState.NeedsSetup)
+            {
+                <MudLink Href="@TitleFixHref" Typo="Typo.body2" Class="ml-1">@TitleFixText</MudLink>
+            }
+        </MudText>
+    </div>
+    <div class="pc-status-item" data-feature="email-attachments">
+        <div class="pc-status-item-header">
+            <MudIcon Icon="@Icons.Material.Rounded.Email" Size="Size.Small" Class="pc-muted" />
+            <MudText Typo="Typo.subtitle1" HtmlTag="h2" Class="font-weight-bold flex-grow-1">@WebStrings.FeatureEmailAttachments</MudText>
+            <StatusChip Text="@StateText(EmailState)" Color="@StateColor(EmailState)" Icon="@StateIcon(EmailState)" />
+        </div>
+        <MudText Typo="Typo.body2" Class="pc-muted">
+            @EmailDetail
+            @if (EmailState != FeatureState.On)
+            {
+                <MudLink Href="settings/email" Typo="Typo.body2" Class="ml-1">@(EmailState == FeatureState.Off ? WebStrings.StatusTurnOn : WebStrings.StatusSetUpEmail)</MudLink>
+            }
+        </MudText>
+    </div>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired] public PipelineSettings Pipeline { get; set; } = new();
+    [Parameter, EditorRequired] public EmailAttachmentSettings Email { get; set; } = new();
+
+    private FeatureState TitleState => FeatureStates.TitleGeneration(Pipeline);
+
+    private FeatureState EmailState => FeatureStates.EmailAttachments(Email);
+
+    private string TitleDetail => (Pipeline.IsPapraConfigured, Pipeline.IsAiConfigured) switch
+    {
+        (true, true) => WebStrings.TitleGenerationOn,
+        (false, false) => WebStrings.TitleGenerationNeedsBoth,
+        (false, true) => WebStrings.TitleGenerationNeedsPapra,
+        _ => WebStrings.TitleGenerationNeedsAi
+    };
+
+    private string TitleFixHref => Pipeline.IsPapraConfigured ? "settings/ai" : "settings/papra";
+
+    private string TitleFixText => Pipeline.IsPapraConfigured ? WebStrings.StatusSetUpAi : WebStrings.StatusSetUpPapra;
+
+    private string EmailDetail => EmailState switch
+    {
+        FeatureState.On => WebStrings.Format(WebStrings.EmailAttachmentsOn, Email.Host),
+        FeatureState.Off => WebStrings.EmailAttachmentsOff,
+        _ => WebStrings.EmailAttachmentsNeedsSetup
+    };
+
+    private static string StateText(FeatureState state) => state switch
+    {
+        FeatureState.On => WebStrings.StateOn,
+        FeatureState.Off => WebStrings.StateOff,
+        _ => WebStrings.StateNeedsSetup
+    };
+
+    private static Color StateColor(FeatureState state) => state switch
+    {
+        FeatureState.On => Color.Success,
+        FeatureState.Off => Color.Default,
+        _ => Color.Warning
+    };
+
+    private static string StateIcon(FeatureState state) => state switch
+    {
+        FeatureState.On => Icons.Material.Rounded.CheckCircle,
+        FeatureState.Off => Icons.Material.Rounded.PauseCircle,
+        _ => Icons.Material.Rounded.Info
+    };
+}

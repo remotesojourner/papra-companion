@@ -5,7 +5,7 @@ namespace Papra.Companion.Tests.Services;
 public class PipelineSettingsTests
 {
     [Fact]
-    public void IsConfigured_WhenAllRequiredFieldsSet_ReturnsTrue()
+    public void IsConfiguredWhenAllRequiredFieldsSetReturnsTrue()
     {
         var settings = new PipelineSettings
         {
@@ -21,7 +21,7 @@ public class PipelineSettingsTests
     [InlineData("", "token", "sk-key")]
     [InlineData("https://papra.example.com", "", "sk-key")]
     [InlineData("https://papra.example.com", "token", "")]
-    public void IsConfigured_WhenAnyRequiredFieldMissing_ReturnsFalse(
+    public void IsConfiguredWhenAnyRequiredFieldMissingReturnsFalse(
         string baseUrl, string token, string openAiKey)
     {
         var settings = new PipelineSettings
@@ -35,13 +35,13 @@ public class PipelineSettingsTests
     }
 
     [Fact]
-    public void DefaultTitlePrompt_ContainsOriginalTitlePlaceholder()
+    public void DefaultTitlePromptContainsOriginalTitlePlaceholder()
     {
         Assert.Contains("{{original_title}}", PipelineSettings.DefaultTitlePrompt);
     }
 
     [Fact]
-    public void ProcessingDelaySeconds_DefaultsToZero()
+    public void ProcessingDelaySecondsDefaultsToZero()
     {
         var settings = new PipelineSettings();
         Assert.Equal(0, settings.ProcessingDelaySeconds);

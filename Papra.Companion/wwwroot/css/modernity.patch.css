@@ -1,0 +1,197 @@
+/*
+ * Modernity CSS patch for MudBlazor by Russell Camo (russkyc), MIT No Attribution.
+ * https://github.com/russkyc/modernity-css-experiment
+ */
+* {
+    /* Removes the forced `uppercase` transform in some components */
+    text-transform: unset !important;
+}
+
+/* Button overrides */
+.mud-button-filled {
+    border: 1px solid var(--mud-palette-lines-default);
+}
+
+.mud-button-filled-primary {
+    border: 1px solid var(--mud-palette-primary-darken) !important;
+}
+
+.mud-button-filled-secondary {
+    border: 1px solid var(--mud-palette-secondary-darken) !important;
+}
+
+.mud-button-filled-tertiary {
+    border: 1px solid var(--mud-palette-tertiary-darken) !important;
+}
+
+.mud-button-filled-warning {
+    border: 1px solid var(--mud-palette-warning-darken) !important;
+}
+
+.mud-button-filled-success {
+    border: 1px solid var(--mud-palette-success-darken) !important;
+}
+
+.mud-button-filled-info {
+    border: 1px solid var(--mud-palette-info-darken) !important;
+}
+
+.mud-button-filled-error {
+    border: 1px solid var(--mud-palette-error-darken) !important;
+}
+
+.mud-nav-link .mud-nav-link-text {
+    margin-inline-start: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Input overrides */
+.mud-input.mud-input-outlined {
+    border-radius: var(--mud-default-borderradius) !important;
+}
+
+/* List overrides */
+.mud-list-item {
+    border-radius: var(--mud-default-borderradius) !important;
+}
+
+.mud-list-item-gutters {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.mud-list-item-icon {
+    color: inherit;
+    min-width: 36px;
+}
+
+/* Expansion panel overrides */
+.mud-expand-panel.mud-expand-panel-border {
+    border: 1px solid var(--mud-palette-lines-default);
+}
+
+.mud-expand-panel .mud-expand-panel-header.mud-expand-panel-header-gutters {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.mud-expand-panel .mud-expand-panel-content.mud-expand-panel-gutters {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+/* Popover overrides */
+.mud-popover.mud-popover-open.mud-paper {
+    border: 1px solid var(--mud-palette-lines-default);
+    padding: 4px;
+}
+
+/* Tab switcher overrides */
+.mud-tab {
+    color: rgb(64, 64, 64, 0.75);
+    border-radius: var(--mud-default-borderradius) !important;
+    background-blend-mode: multiply !important;
+}
+
+.mud-tabs-tabbar {
+    background-color: var(--mud-palette-action-default-hover) !important;
+    background-blend-mode: hard-light !important;
+    border-radius: var(--mud-default-borderradius) !important;
+    padding: 4px !important;
+}
+
+.mud-tabs-tabbar.mud-tabs-border-left {
+    border-right: unset !important;
+    border-radius: var(--mud-default-borderradius) !important;
+}
+
+.mud-tabs-tabbar.mud-tabs-border-right {
+    border-left: unset !important;
+    border-radius: var(--mud-default-borderradius) !important;
+}
+
+.mud-tabs-tabbar.mud-tabs-border-top {
+    border-bottom: unset !important;
+    border-radius: var(--mud-default-borderradius) !important;
+}
+
+.mud-tabs-tabbar.mud-tabs-border-bottom {
+    border-top: unset !important;
+    border-radius: var(--mud-default-borderradius) !important;
+}
+
+.mud-tab.mud-tab-active {
+    color: inherit;
+    background: var(--mud-palette-background) !important;
+    border: 1px solid var(--mud-palette-lines-default) !important;
+}
+
+.mud-tabs-tabbar.mud-tabs-rounded {
+    border-radius: var(--mud-default-borderradius) !important;
+    padding: 3px !important;
+}
+
+.mud-tab-slider {
+    all: unset !important;
+}
+
+.mud-tabs-panels {
+    padding-top: 4px;
+}
+
+.mud-tabs-panels.mud-tabs-vertical {
+    padding-left: 4px;
+}
+
+/* Appbar overrides */
+.mud-appbar.mud-appbar-fixed-top {
+    border-bottom: 1px solid var(--mud-palette-lines-default) !important;
+}
+
+/* Drawer overrides */
+.mud-drawer-pos-left {
+    border-right: 1px solid var(--mud-palette-lines-default) !important;
+}
+
+/* Light mode overrides */
+@container style(--mud-native-html-color-scheme: light) {
+
+    /* Tab switcher overrides */
+    .mud-tab {
+        color: rgb(64, 64, 64, 0.75);
+    }
+
+    /* Apply a more contrasty background to the outlined input variant */
+    .mud-input.mud-input-outlined {
+        background: rgb(164, 164, 164, 0.05) !important;
+        background-blend-mode: hard-light !important;
+    }
+
+}
+
+/* Dark mode overrides */
+@container style(--mud-native-html-color-scheme: dark) {
+
+    /* Popover overrides*/
+    .mud-popover.mud-popover-open.mud-paper {
+        background: var(mud-palette-action-default) !important;
+    }
+
+    /* Apply a more contrasty background to the outlined input variant */
+    .mud-input.mud-input-outlined {
+        background: rgb(96, 96, 96, 0.12) !important;
+        background-blend-mode: hard-light !important;
+    }
+
+    /* Tab switcher overrides */
+    .mud-tab {
+        color: rgb(182, 182, 182, 0.75);
+    }
+
+    .mud-tab.mud-tab-active {
+        background: rgb(96, 96, 96, 0.12) !important;
+        background-blend-mode: hard-light !important;
+    }
+
+}

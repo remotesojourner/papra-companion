@@ -1,0 +1,11 @@
+<div class="pc-placeholders">
+    <span>@WebStrings.PlaceholdersTitle</span>
+    @foreach (var (token, description) in Placeholders)
+    {
+        <code class="pc-placeholder" title="@description">@token</code>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IEnumerable<(string Token, string Description)> Placeholders { get; set; } = [];
+}

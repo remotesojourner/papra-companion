@@ -12,7 +12,7 @@ namespace Papra.Companion.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260717173923_RemoveOcrTagsMistral_AddProcessingDelay")]
-    partial class RemoveOcrTagsMistral_AddProcessingDelay
+    partial class RemoveOcrTagsMistralAddProcessingDelay
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
