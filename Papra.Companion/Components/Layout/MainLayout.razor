@@ -1,6 +1,5 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject OidcOptions OidcOptions
 @inject BrowserInteropService Browser
 
@@ -77,13 +76,20 @@
     private bool _themeLoaded;
     private string? _userName;
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
     private string? ThemeName => _themeLoaded ? (_isDarkMode ? "dark" : "light") : null;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        if (!OidcOptions.Enabled) return;
+        if (!OidcOptions.Enabled || AuthenticationState is null)
+        {
+            _userName = null;
+            return;
+        }
 
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthenticationState;
         _userName = authState.User.Identity?.IsAuthenticated == true ? authState.User.Identity.Name : null;
     }
 

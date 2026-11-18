@@ -164,7 +164,7 @@ Configures the IMAP attachment downloader background service.
 
 ### Requirements
 
-- .NET 10 SDK
+- .NET 11 SDK
 
 ### Run locally
 
@@ -191,10 +191,10 @@ Conventions:
 dotnet test
 dotnet test --project Papra.Companion.Tests --filter-not-trait "Category=Browser"
 dotnet test --project Papra.Companion.Tests --filter-trait "Category=Browser"
-pwsh Papra.Companion.Tests/bin/Debug/net10.0/playwright.ps1 install chromium
+pwsh Papra.Companion.Tests/bin/Debug/net11.0/playwright.ps1 install chromium
 ```
 
-The browser tests run the app on a free port with sample data and drive it with Playwright. They are skipped when Chromium isn't installed, unless `PAPRA_COMPANION_BROWSER_TESTS=required` is set, as it is in CI. `PageLayoutTests` saves every page in both themes at 1280px and 390px to `Papra.Companion.Tests/bin/Debug/net10.0/TestResults/browser`; look at them after UI changes.
+The browser tests run the app on a free port with sample data and drive it with Playwright. They are skipped when Chromium isn't installed, unless `PAPRA_COMPANION_BROWSER_TESTS=required` is set, as it is in CI. `PageLayoutTests` saves every page in both themes at 1280px and 390px to `Papra.Companion.Tests/bin/Debug/net11.0/TestResults/browser`; look at them after UI changes.
 
 ### Database migrations
 
@@ -210,7 +210,7 @@ dotnet ef migrations add <MigrationName> --project Papra.Companion.Data --startu
 
 | Component | Technology |
 |---|---|
-| Framework | ASP.NET Core 10, Blazor Server (Interactive Server render mode) |
+| Framework | ASP.NET Core 11, Blazor Server (Interactive Server render mode) |
 | UI components | [MudBlazor](https://mudblazor.com/) with the [Modernity CSS patch](https://github.com/russkyc/modernity-css-experiment) |
 | Database | SQLite via Entity Framework Core |
 | HTTP clients | `System.Net.Http.Json` with typed DTOs |

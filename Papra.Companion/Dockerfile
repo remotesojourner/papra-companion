@@ -1,13 +1,13 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS base
 ARG APP_UID=1000
 USER ${APP_UID}
 WORKDIR /app
 EXPOSE 1003
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Directory.Packages.props", "./"]
+COPY ["global.json", "Directory.Build.props", "Directory.Packages.props", "./"]
 COPY ["Papra.Companion/Papra.Companion.csproj", "Papra.Companion/"]
 COPY ["Papra.Companion.Data/Papra.Companion.Data.csproj", "Papra.Companion.Data/"]
 RUN dotnet restore "./Papra.Companion/Papra.Companion.csproj"

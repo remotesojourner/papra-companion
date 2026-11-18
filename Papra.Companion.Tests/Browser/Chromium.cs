@@ -8,7 +8,7 @@ public sealed class Chromium : IAsyncLifetime
 
     private const string InstallHint =
         "Chromium isn't installed for Playwright, so the browser tests were skipped. Build the tests, then run: " +
-        "pwsh Papra.Companion.Tests/bin/Debug/net10.0/playwright.ps1 install chromium";
+        "pwsh Papra.Companion.Tests/bin/Debug/net11.0/playwright.ps1 install chromium";
 
     private IPlaywright? _playwright;
 

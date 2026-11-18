@@ -5,21 +5,123 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "sunday"
+    ignore:
+      # GitTools/actions v5 targets GitVersion 7 and breaks v6 workflows/config
+      - dependency-name: "gittools/actions*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      github-actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   # Docker Compose
   - package-ecosystem: "docker-compose"
     directory: "/docker-compose"
     schedule:
       interval: "weekly"
+      day: "sunday"
+    groups:
+      docker-compose:
+        patterns:
+          - "*"
 
   # Docker (Dockerfile for the Blazor App)
   - package-ecosystem: "docker"
     directory: "/Papra.Companion"
     schedule:
       interval: "weekly"
+      day: "sunday"
+    ignore:
+      # Major .NET SDK/runtime bumps require updating <TargetFramework> and CI together
+      - dependency-name: "dotnet/aspnet"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "dotnet/sdk"
+        update-types: ["version-update:semver-major"]
+    groups:
+      docker:
+        patterns:
+          - "*"
 
   # NuGet (versions in Directory.Packages.props)
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "sunday"
+    cooldown:
+      default-days: 4
+    ignore:
+      # Major .NET/EF Core bumps require upgrading <TargetFramework>, SDK, and Dockerfile together
+      - dependency-name: "Microsoft.AspNetCore.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.EntityFrameworkCore.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "System.Security.Cryptography.*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      dotnet-packages:
+        applies-to: version-updates
+        patterns:
+          - "Microsoft.AspNetCore.*"
+          - "Microsoft.EntityFrameworkCore.*"
+          - "Microsoft.Extensions.*"
+          - "SQLitePCLRaw.*"
+          - "System.Security.Cryptography.*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        applies-to: version-updates
+        patterns:
+          - "AngleSharp*"
+          - "bunit*"
+          - "coverlet.*"
+          - "Microsoft.NET.Test.Sdk"
+          - "Microsoft.Playwright*"
+          - "NSubstitute*"
+          - "xunit*"
+      dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "Microsoft.AspNetCore.*"
+          - "Microsoft.EntityFrameworkCore.*"
+          - "Microsoft.Extensions.*"
+          - "SQLitePCLRaw.*"
+          - "System.Security.Cryptography.*"
+          - "AngleSharp*"
+          - "bunit*"
+          - "coverlet.*"
+          - "Microsoft.NET.Test.Sdk"
+          - "Microsoft.Playwright*"
+          - "NSubstitute*"
+          - "xunit*"
+        update-types:
+          - "minor"
+          - "patch"
+      dotnet-security:
+        applies-to: security-updates
+        patterns:
+          - "Microsoft.AspNetCore.*"
+          - "Microsoft.EntityFrameworkCore.*"
+          - "Microsoft.Extensions.*"
+          - "SQLitePCLRaw.*"
+          - "System.Security.Cryptography.*"
+      testing-security:
+        applies-to: security-updates
+        patterns:
+          - "AngleSharp*"
+          - "bunit*"
+          - "coverlet.*"
+          - "Microsoft.NET.Test.Sdk"
+          - "Microsoft.Playwright*"
+          - "NSubstitute*"
+          - "xunit*"
